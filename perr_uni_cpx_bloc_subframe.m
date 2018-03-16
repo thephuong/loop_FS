@@ -1,7 +1,10 @@
-function perr = perr_uni_cpx_bloc_subframe(m,n,s,rho,rule,NTEST,NB_SUBFRAME)
+function perr = perr_uni_cpx_bloc_subframe(m,n,s,rho,rule,NB_SUBFRAME,SIMUPARAMS)
 
 % if nargin < 6; NTEST = 1e6; end
 % if nargin < 5; rule = 2; NTEST = 1e6; end
+
+NTEST = SIMUPARAMS.NTEST;
+min_NERR = SIMUPARAMS.min_NERR;
 
 N = m+n;
 r = sqrt(n*rho);
@@ -66,7 +69,7 @@ for ibloc = 1:nbloc
     end
     nerr = nerr + fis_err_bloc(metrictau_bloc,mod(tau0,N/NB_SUBFRAME)+1);
 
-    if (nerr > 100)
+    if (nerr > min_NERR) %500
         break;
     end
 end

@@ -1,8 +1,12 @@
-function perr = perr_uni_cpx_iterative_bloc(m,n,s,rho,rule,NTEST,nbiteration,nbframe)
+function perr = perr_uni_cpx_iterative_bloc(m,n,s,rho,rule,nbiteration,nbframe,SIMUPARAMS)
 
-if nargin < 6; NTEST = 1e6; end
-if nargin < 5; rule = 2; NTEST = 1e6; end
-if nargin < 7; nbiteration = 2; end
+% if nargin < 6; NTEST = 1e6; end
+% if nargin < 5; rule = 2; NTEST = 1e6; end
+% if nargin < 7; nbiteration = 2; end
+
+NTEST = SIMUPARAMS.NTEST;
+min_NERR = SIMUPARAMS.min_NERR;
+
 N = m+n;
 r = sqrt(n*rho);
 
@@ -35,7 +39,7 @@ for ibloc = 1:nbloc
     end
     nerrs = nerrs + fis_err_bloc(logptau, mod(tau0,N)+1);
 
-    if (nerrs > 500)
+    if (nerrs > min_NERR) %500
         break;
     end
 end

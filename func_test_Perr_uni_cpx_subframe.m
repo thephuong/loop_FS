@@ -5,6 +5,9 @@ if mod(N,NB_SUBFRAME) ~= 0
 end
 if (nargin < 5); NTEST = 1e6; end
 
+SIMUPARAMS.NTEST = NTEST;
+SIMUPARAMS.min_NERR = 500;
+
 fprintf('TEST FS SUBFRAME: instead of a long SW, use %d short sequences.\n', NB_SUBFRAME);
 
 % nopt = 90;mopt = 12;
@@ -17,7 +20,10 @@ rho_tot = 10^(rho_tot_dB/10);
 epsilon = 1e-3; %1e-6;
 stype = 2; %1 uni, 2 ZC, 3 bin
 sname = {'uni','ZC','bin'};
-% descrip = 'N=102 rho=0db real simu of perr sync, s uni with 3db boost, corr rule. perr margin. epsilon=1e-3';
+
+% cleanUp function
+fname_prefix = sprintf('tpn_SUBFRAME%d_N%d_rho_tot%ddB_alphaPower%d_1e%d',NB_SUBFRAME,N,rho_tot_dB,alpha,-log10(epsilon));
+onExitObj = onCleanup(@()onExitFunc(fname_prefix));
 
 %CONST
 CONST_ML_RULE=1;
@@ -54,20 +60,16 @@ for im = 1:lenmm
     
     %real Pe
 %     perr(im) = perr_uni_cpx_bloc(m,n,ss{im},rhoD_tab(im), CONST_ML_RULE, NTEST);
-    perr(im) = perr_uni_cpx_bloc_subframe(m,n,ss{im},rhoD_tab(im), CONST_ML_RULE, NTEST,NB_SUBFRAME);
-    perr_cor(im) = perr_uni_cpx_bloc_subframe(m,n,ss{im},rhoD_tab(im), CONST_COR_RULE, NTEST,NB_SUBFRAME);
+    perr(im) = perr_uni_cpx_bloc_subframe(m,n,ss{im},rhoD_tab(im), CONST_ML_RULE,NB_SUBFRAME,SIMUPARAMS);
+    perr_cor(im) = perr_uni_cpx_bloc_subframe(m,n,ss{im},rhoD_tab(im), CONST_COR_RULE,NB_SUBFRAME,SIMUPARAMS);
     %real Pe iterative ML rule
-    perr2_iterative1(im) = perr_uni_cpx_iterative_bloc(msf,nsf,ss_sf{im},rhoD_tab(im), CONST_ML_RULE, NTEST, 1,NB_SUBFRAME);
-%     perr2_iterative2(im) = perr_uni_cpx_iterative_bloc(msf,nsf,ss_sf{im},rhoD_tab(im), CONST_ML_RULE, NTEST, 2,NBFRAME);
-    perr2_iterative4(im) = perr_uni_cpx_iterative_bloc(msf,nsf,ss_sf{im},rhoD_tab(im), CONST_ML_RULE, NTEST, 4,NB_SUBFRAME);
+    perr2_iterative1(im) = perr_uni_cpx_iterative_bloc(msf,nsf,ss_sf{im},rhoD_tab(im), CONST_ML_RULE, 1,NB_SUBFRAME,SIMUPARAMS);
+%     perr2_iterative2(im) = perr_uni_cpx_iterative_bloc(msf,nsf,ss_sf{im},rhoD_tab(im), CONST_ML_RULE, 2,NB_SUBFRAME,SIMUPARAMS);
+    perr2_iterative4(im) = perr_uni_cpx_iterative_bloc(msf,nsf,ss_sf{im},rhoD_tab(im), CONST_ML_RULE, 4,NB_SUBFRAME,SIMUPARAMS);
     %real Pe iterative CORR rule
-    perr2_cor_iterative1(im) = perr_uni_cpx_iterative_bloc(msf,nsf,ss_sf{im},rhoD_tab(im), CONST_COR_RULE, NTEST, 1,NB_SUBFRAME);
-%     perr2_cor_iterative2(im) = perr_uni_cpx_iterative_bloc(msf,nsf,ss_sf{im},rhoD_tab(im), CONST_COR_RULE, NTEST, 2,NBFRAME);
-    perr2_cor_iterative4(im) = perr_uni_cpx_iterative_bloc(msf,nsf,ss_sf{im},rhoD_tab(im), CONST_COR_RULE, NTEST, 4,NB_SUBFRAME);
-%     fprintf('m=%d perr=%.3e perr2v2=%.3e (trunc=%.3e) : perr2=%.3e\n ===perr2_it_ML  %.3e | %.3e | %.3e\n ===perr2_it_cor %.3e | %.3e | %.3e\n', ...
-%         m,perr(im),perr2v2(im),perr2v2_trunc(im),perr2(im), ...
-%         perr2_iterative1(im),perr2_iterative2(im),perr2_iterative4(im), ...
-%         perr2_cor_iterative1(im),perr2_cor_iterative2(im),perr2_cor_iterative4(im));
+    perr2_cor_iterative1(im) = perr_uni_cpx_iterative_bloc(msf,nsf,ss_sf{im},rhoD_tab(im), CONST_COR_RULE, 1,NB_SUBFRAME,SIMUPARAMS);
+%     perr2_cor_iterative2(im) = perr_uni_cpx_iterative_bloc(msf,nsf,ss_sf{im},rhoD_tab(im), CONST_COR_RULE, 2,NB_SUBFRAME,SIMUPARAMS);
+    perr2_cor_iterative4(im) = perr_uni_cpx_iterative_bloc(msf,nsf,ss_sf{im},rhoD_tab(im), CONST_COR_RULE, 4,NB_SUBFRAME,SIMUPARAMS);
     fprintf('SUBFRAME=%d (randi) m=%d n=%d --> msf=%d nsf=%d: perr=%.3e perr_cor=%.3e\n ===perr2_it_ML  %.3e | %.3e\n ===perr2_it_cor %.3e | %.3e\n', ...
         NB_SUBFRAME,m,n,msf,nsf,perr(im),perr_cor(im), ...
         perr2_iterative1(im),perr2_iterative4(im), ...
@@ -92,6 +94,12 @@ if (DO_VISUALIZE)
 end
 
 %% Save
-dtt = datestr(datetime);
-dtt(dtt==':')='-';
-save(sprintf('tpn_SUBFRAME%d_N%d_rho_tot%ddB_alphaPower%d_1e%d_%s.mat',NB_SUBFRAME,N,rho_tot_dB,alpha,-log10(epsilon),dtt));
+function onExitFunc(fname_prefix)
+    dtt = datestr(datetime);
+    dtt(dtt==':')='-';
+    fname = sprintf('%s_%s.mat',fname_prefix,dtt);
+    fprintf('DONE or Interrupted. Saving data to %s\n', fname);
+    save(fname);
+end
+
+end
