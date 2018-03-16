@@ -20,13 +20,20 @@ for ibloc = 1:nbloc
 %     y = x + 1/sqrt(2)*(randn(nbframe*N,ntest_perbloc)+1i*randn(nbframe*N,ntest_perbloc));
     y = circshift(x + 1/sqrt(2)*(randn(nbframe*N,ntest_perbloc)+1i*randn(nbframe*N,ntest_perbloc)),tau0);
     
-    ptau = (1/N)*ones(N,ntest_perbloc);
+%     ptau = (1/N)*ones(N,ntest_perbloc);
+%     for iter = 1:nbiteration
+%         for iframe = 1:nbframe
+%             ptau = fmetric_alltau_bloc(y((iframe-1)*N+1:(iframe-1)*N+N,:),m,n,rho,s,ptau,rule);
+%         end
+%     end
+%     nerrs = nerrs + fis_err_bloc(ptau, mod(tau0,N)+1);
+    logptau = -log(N)*ones(N,ntest_perbloc);
     for iter = 1:nbiteration
         for iframe = 1:nbframe
-            ptau = fmetric_alltau_bloc(y((iframe-1)*N+1:(iframe-1)*N+N,:),m,n,rho,s,ptau,rule);
+            logptau = fmetric_log_alltau_bloc(y((iframe-1)*N+1:(iframe-1)*N+N,:),m,n,rho,s,logptau,rule);
         end
     end
-    nerrs = nerrs + fis_err_bloc(ptau, mod(tau0,N)+1);
+    nerrs = nerrs + fis_err_bloc(logptau, mod(tau0,N)+1);
 
     if (nerrs > 500)
         break;
@@ -49,6 +56,23 @@ maxmetric = max(metrictau);
 tauhat_tab = find(metrictau == maxmetric);
 tauhat = tauhat_tab(randi(length(tauhat_tab)));
 iserr = (tauhat ~= expected_tauhat);
+end
+
+function logpMAP = fmetric_log_alltau_bloc(y,m,n,rho,s,logptau,rule)
+N = m+n;
+temp = zeros(N,size(logptau,2));
+if (rule == 1)
+    temp(1,:) = fmetric_uni_cpx_bloc(y,m,n,rho,s);
+    for tau=1:N-1
+        temp(tau+1,:) = fmetric_uni_cpx_bloc(circshift(y,-tau),m,n,rho,s);
+    end
+else %rule==2
+    temp(1,:) = metric_cor2(y,m,s);
+    for tau=1:N-1
+        temp(tau+1,:) = metric_cor2(circshift(y,-tau),m,s);
+    end
+end
+logpMAP = temp + logptau;
 end
 
 function pMAP = fmetric_alltau_bloc(y,m,n,rho,s,ptau,rule)

@@ -43,7 +43,7 @@ perr2_cor_iterative4 = zeros(lenmm,1);
 % NB_SUBFRAME=3; %must be impair
 DO_VISUALIZE = 0;
 
-parfor im = 1:lenmm
+for im = 1:lenmm
 	m = mm(im);
 	n = nn(im);
     msf = m/NB_SUBFRAME;
