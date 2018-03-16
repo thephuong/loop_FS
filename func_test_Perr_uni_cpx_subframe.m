@@ -31,6 +31,7 @@ ss = cell(lenmm,1);
 rhoD_tab = zeros(lenmm,1);
 
 perr = zeros(lenmm,1);         %sync error, optimum rule, sim
+perr_cor = zeros(lenmm,1);         %sync error, optimum rule, sim
 ss_sf = cell(lenmm,1);
 
 perr2_iterative1 = zeros(lenmm,1);
@@ -50,10 +51,11 @@ for im = 1:lenmm
     nsf = n/NB_SUBFRAME;
     [ss{im},rhoD_tab(im)] = fGenSyncWord(m,n,rho_tot,alpha,stype);
     [ss_sf{im},~] = fGenSyncWord(msf,nsf,rho_tot,alpha,stype);
-
     
     %real Pe
-    perr(im) = perr_uni_cpx_bloc(m,n,ss{im},rhoD_tab(im), CONST_ML_RULE, NTEST);
+%     perr(im) = perr_uni_cpx_bloc(m,n,ss{im},rhoD_tab(im), CONST_ML_RULE, NTEST);
+    perr(im) = perr_uni_cpx_bloc_subframe(m,n,ss{im},rhoD_tab(im), CONST_ML_RULE, NTEST,NB_SUBFRAME);
+    perr_cor(im) = perr_uni_cpx_bloc_subframe(m,n,ss{im},rhoD_tab(im), CONST_COR_RULE, NTEST,NB_SUBFRAME);
     %real Pe iterative ML rule
     perr2_iterative1(im) = perr_uni_cpx_iterative_bloc(msf,nsf,ss_sf{im},rhoD_tab(im), CONST_ML_RULE, NTEST, 1,NB_SUBFRAME);
 %     perr2_iterative2(im) = perr_uni_cpx_iterative_bloc(msf,nsf,ss_sf{im},rhoD_tab(im), CONST_ML_RULE, NTEST, 2,NBFRAME);
@@ -66,8 +68,8 @@ for im = 1:lenmm
 %         m,perr(im),perr2v2(im),perr2v2_trunc(im),perr2(im), ...
 %         perr2_iterative1(im),perr2_iterative2(im),perr2_iterative4(im), ...
 %         perr2_cor_iterative1(im),perr2_cor_iterative2(im),perr2_cor_iterative4(im));
-    fprintf('SUBFRAME=%d (randi) m=%d n=%d --> msf=%d nsf=%d: perr=%.3e\n ===perr2_it_ML  %.3e | %.3e\n ===perr2_it_cor %.3e | %.3e\n', ...
-        NB_SUBFRAME,m,n,msf,nsf,perr(im), ...
+    fprintf('SUBFRAME=%d (randi) m=%d n=%d --> msf=%d nsf=%d: perr=%.3e perr_cor=%.3e\n ===perr2_it_ML  %.3e | %.3e\n ===perr2_it_cor %.3e | %.3e\n', ...
+        NB_SUBFRAME,m,n,msf,nsf,perr(im),perr_cor(im), ...
         perr2_iterative1(im),perr2_iterative4(im), ...
         perr2_cor_iterative1(im),perr2_cor_iterative4(im));
 end
