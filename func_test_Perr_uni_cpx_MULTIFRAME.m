@@ -67,8 +67,7 @@ for im = 1:lenmm
     
     %real Pe
     perr(im) = perr_uni_cpx_bloc(m,n,ss{im},rhoD_tab(im), CONST_ML_RULE, NTEST);
-%     perr2(im) = perr_uni_cpx2_bloc(m,n,ss{im},rhoD_tab(im), CONST_ML_RULE, NTEST);
-    perr2(im) = perr_uni_cpx_bloc(NBFRAME*m,NBFRAME*n,repmat(ss{im},NBFRAME,1),rhoD_tab(im), CONST_ML_RULE, NTEST);
+    perr2(im) = perr_uni_cpx_bloc_MULTIFRAME(m,n,ss{im},rhoD_tab(im),CONST_ML_RULE, NBFRAME,SIMUPARAMS);
     perr2v2(im) = perr_uni_cpx_bloc(mv2,nv2,ssv2{im},rhoD_tabv2(im), CONST_ML_RULE, NTEST); %%%%%
 %     perr2v2_trunc(im) = perr_uni_cpx_bloc(2*m,2*n,ssv2{im}(1:end-1),N/(m*alpha+n)*rho_tot, CONST_ML_RULE, NTEST);
     %real Pe iterative ML rule
@@ -77,7 +76,7 @@ for im = 1:lenmm
     %real Pe iterative CORR rule
     perr2_cor_iterative1(im) = perr_uni_cpx_iterative_bloc(m,n,ss{im},rhoD_tab(im), CONST_COR_RULE, 1,NBFRAME,SIMUPARAMS);
     perr2_cor_iterative4(im) = perr_uni_cpx_iterative_bloc(m,n,ss{im},rhoD_tab(im), CONST_COR_RULE, 4,NBFRAME,SIMUPARAMS);
-    fprintf('NBFRAME=%d (randi) m=%d n=%d: perr=%.3e perr2v2=%.3e (mv2=%d nv2=%d) perr2multiple=%.3e\n ===perr2_it_ML  %.3e | %.3e\n ===perr2_it_cor %.3e | %.3e\n', ...
+    fprintf('NBFRAME=%d (MULTIFRAME) m=%d n=%d: perr=%.3e perr2v2=%.3e (mv2=%d nv2=%d) perr2multiple=%.3e\n ===perr2_it_ML  %.3e | %.3e\n ===perr2_it_cor %.3e | %.3e\n', ...
         NBFRAME,m,n,perr(im),perr2v2(im),mv2,nv2,perr2(im), ...
         perr2_iterative1(im),perr2_iterative4(im), ...
         perr2_cor_iterative1(im),perr2_cor_iterative4(im));
