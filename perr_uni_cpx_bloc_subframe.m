@@ -9,6 +9,15 @@ min_NERR = SIMUPARAMS.min_NERR;
 N = m+n;
 r = sqrt(n*rho);
 
+switch (rule)
+    case SIMUPARAMS.CONST_ML_RULE
+        fmetric = @(y,tau,m,n,rho,s) fmetric_uni_cpx_bloc(circshift(y,-tau),m,n,rho,s);
+    case SIMUPARAMS.CONST_COR_RULE
+        fmetric = @(y,tau,m,n,rho,s) fmetric_cor_cpx_bloc(circshift(y,-tau),m,s);
+    otherwise
+        error('Rule(%d) not supported.',rule);
+end
+
 ntest_perbloc = 1000;
 nbloc = ceil(NTEST/ntest_perbloc);
 sbloc = repmat(s,1,ntest_perbloc);
@@ -52,20 +61,10 @@ for ibloc = 1:nbloc
     tauval3 = m+1;
     tauval4 = m+n/NB_SUBFRAME;
     tauvals = [tauval1:tauval2 tauval3:tauval4]-1;
-    switch (rule)
-        case 1
-            for itau = 1:length(tauvals)
-                tau = tauvals(itau);
-                metrictau_bloc(itau,:) = fmetric_uni_cpx_bloc(circshift(y,-tau),m,n,rho,s);
-            end
-        case 2
-            for itau = 1:length(tauvals)
-                tau = tauvals(itau);
-                metrictau_bloc(itau,:) = fmetric_cor_cpx_bloc(circshift(y,-tau),m,s);
-            end
-        otherwise
-            error('Rule(%d) not supported.',rule);
-%             for tau = taurange1:taurange2; metrictau_bloc(tau+1-taurange1,:) = metric_test(circshift(y,-tau),m,n,rho,s); end
+
+    for itau = 1:length(tauvals)
+        tau = tauvals(itau);
+        metrictau_bloc(itau,:) = fmetric(y,tau,m,n,rho,s);
     end
     nerr = nerr + fis_err_bloc(metrictau_bloc,mod(tau0,N/NB_SUBFRAME)+1);
 

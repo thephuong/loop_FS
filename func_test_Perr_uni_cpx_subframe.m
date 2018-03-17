@@ -5,8 +5,14 @@ if mod(N,NB_SUBFRAME) ~= 0
 end
 if (nargin < 5); NTEST = 1e6; end
 
+%CONST
+CONST_ML_RULE=1;
+CONST_COR_RULE=2;
+
 SIMUPARAMS.NTEST = NTEST;
-SIMUPARAMS.min_NERR = 500;
+SIMUPARAMS.min_NERR = 100;
+SIMUPARAMS.CONST_ML_RULE = 1;
+SIMUPARAMS.CONST_COR_RULE = 2;
 
 fprintf('TEST FS SUBFRAME: instead of a long SW, use %d short sequences.\n', NB_SUBFRAME);
 
@@ -24,10 +30,6 @@ sname = {'uni','ZC','bin'};
 % cleanUp function
 fname_prefix = sprintf('tpn_SUBFRAME%d_N%d_rho_tot%ddB_alphaPower%d_1e%d',NB_SUBFRAME,N,rho_tot_dB,alpha,-log10(epsilon));
 onExitObj = onCleanup(@()onExitFunc(fname_prefix));
-
-%CONST
-CONST_ML_RULE=1;
-CONST_COR_RULE=2;
 
 mm = (3:2:15)*NB_SUBFRAME;
 nn = N - mm;

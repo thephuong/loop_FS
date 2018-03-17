@@ -10,6 +10,15 @@ min_NERR = SIMUPARAMS.min_NERR;
 N = m+n;
 r = sqrt(n*rho);
 
+switch (rule)
+    case SIMUPARAMS.CONST_ML_RULE
+        fmetric = @(y,m,n,rho,s) fmetric_uni_cpx_bloc(y,m,n,rho,s);
+    case SIMUPARAMS.CONST_COR_RULE
+        fmetric = @(y,m,n,rho,s) metric_cor2(y,m,s);
+    otherwise
+        error('Rule(%d) not supported.',rule);
+end
+
 ntest_perbloc = 1000;
 nbloc = ceil(NTEST/ntest_perbloc);
 sbloc = repmat(s,1,ntest_perbloc);
@@ -34,7 +43,14 @@ for ibloc = 1:nbloc
     logptau = -log(N)*ones(N,ntest_perbloc);
     for iter = 1:nbiteration
         for iframe = 1:nbframe
-            logptau = fmetric_log_alltau_bloc(y((iframe-1)*N+1:(iframe-1)*N+N,:),m,n,rho,s,logptau,rule);
+%             logptau = fmetric_log_alltau_bloc(y((iframe-1)*N+1:(iframe-1)*N+N,:),m,n,rho,s,logptau,rule);
+            yy = y((iframe-1)*N+1:(iframe-1)*N+N,:);
+            temp = zeros(N,size(logptau,2));
+            temp(1,:) = fmetric(yy,m,n,rho,s);
+            for tau=1:N-1
+                temp(tau+1,:) = fmetric(circshift(yy,-tau),m,n,rho,s);
+            end
+            logptau = temp + logptau;
         end
     end
     nerrs = nerrs + fis_err_bloc(logptau, mod(tau0,N)+1);
@@ -44,7 +60,6 @@ for ibloc = 1:nbloc
     end
 end
 
-% perr = mean(nerr);
 perr = nerrs/ibloc/ntest_perbloc;
 end
 
@@ -62,41 +77,41 @@ tauhat = tauhat_tab(randi(length(tauhat_tab)));
 iserr = (tauhat ~= expected_tauhat);
 end
 
-function logpMAP = fmetric_log_alltau_bloc(y,m,n,rho,s,logptau,rule)
-N = m+n;
-temp = zeros(N,size(logptau,2));
-if (rule == 1)
-    temp(1,:) = fmetric_uni_cpx_bloc(y,m,n,rho,s);
-    for tau=1:N-1
-        temp(tau+1,:) = fmetric_uni_cpx_bloc(circshift(y,-tau),m,n,rho,s);
-    end
-else %rule==2
-    temp(1,:) = metric_cor2(y,m,s);
-    for tau=1:N-1
-        temp(tau+1,:) = metric_cor2(circshift(y,-tau),m,s);
-    end
-end
-logpMAP = temp + logptau;
-end
-
-function pMAP = fmetric_alltau_bloc(y,m,n,rho,s,ptau,rule)
-N = m+n;
-temp = zeros(N,size(ptau,2));
-if (rule == 1)
-    temp(1,:) = fmetric_uni_cpx_bloc(y,m,n,rho,s);
-    for tau=1:N-1
-        temp(tau+1,:) = fmetric_uni_cpx_bloc(circshift(y,-tau),m,n,rho,s);
-    end
-else %rule==2
-    temp(1,:) = metric_cor2(y,m,s);
-    for tau=1:N-1
-        temp(tau+1,:) = metric_cor2(circshift(y,-tau),m,s);
-    end
-end
-pMAP_unnormalized = temp + log(ptau);
-pMAP = exp(pMAP_unnormalized) ./ repmat(sum(exp(pMAP_unnormalized),1),N,1);
-% pMAP = temp;
-end
+% function logpMAP = fmetric_log_alltau_bloc(y,m,n,rho,s,logptau,rule)
+% N = m+n;
+% temp = zeros(N,size(logptau,2));
+% if (rule == 1)
+%     temp(1,:) = fmetric_uni_cpx_bloc(y,m,n,rho,s);
+%     for tau=1:N-1
+%         temp(tau+1,:) = fmetric_uni_cpx_bloc(circshift(y,-tau),m,n,rho,s);
+%     end
+% else %rule==2
+%     temp(1,:) = metric_cor2(y,m,s);
+%     for tau=1:N-1
+%         temp(tau+1,:) = metric_cor2(circshift(y,-tau),m,s);
+%     end
+% end
+% logpMAP = temp + logptau;
+% end
+% 
+% function pMAP = fmetric_alltau_bloc(y,m,n,rho,s,ptau,rule)
+% N = m+n;
+% temp = zeros(N,size(ptau,2));
+% if (rule == 1)
+%     temp(1,:) = fmetric_uni_cpx_bloc(y,m,n,rho,s);
+%     for tau=1:N-1
+%         temp(tau+1,:) = fmetric_uni_cpx_bloc(circshift(y,-tau),m,n,rho,s);
+%     end
+% else %rule==2
+%     temp(1,:) = metric_cor2(y,m,s);
+%     for tau=1:N-1
+%         temp(tau+1,:) = metric_cor2(circshift(y,-tau),m,s);
+%     end
+% end
+% pMAP_unnormalized = temp + log(ptau);
+% pMAP = exp(pMAP_unnormalized) ./ repmat(sum(exp(pMAP_unnormalized),1),N,1);
+% % pMAP = temp;
+% end
 
 function metric = metric_cor2(y,m,s)
 metric = 2*real(s'*y(1:m,:));
