@@ -1,0 +1,31 @@
+func_test_Perr_uni_cpx_subframe(315,-1,1,3,1e7)
+TEST FS SUBFRAME: instead of a long SW, use 3 short sequences.
+SUBFRAME=3 m=9 n=306 --> msf=3 nsf=102: perr=2.820e-01 perr_cor=3.515e-01
+ ===perrMulti_ML 2.560e-01 perrMulti_cor 3.295e-01
+ ===perr2_it_ML  2.217e-01 | 2.133e-01
+ ===perr2_it_cor 3.730e-01 | 3.630e-01
+SUBFRAME=3 m=15 n=300 --> msf=5 nsf=100: perr=5.833e-02 perr_cor=9.550e-02
+ ===perrMulti_ML 5.633e-02 perrMulti_cor 8.533e-02
+ ===perr2_it_ML  3.433e-02 | 3.194e-02
+ ===perr2_it_cor 1.046e-01 | 1.012e-01
+SUBFRAME=3 m=21 n=294 --> msf=7 nsf=98: perr=8.912e-03 perr_cor=1.988e-02
+ ===perrMulti_ML 8.610e-03 perrMulti_cor 1.713e-02
+ ===perr2_it_ML  3.884e-03 | 4.261e-03
+ ===perr2_it_cor 2.121e-02 | 2.084e-02
+SUBFRAME=3 m=27 n=288 --> msf=9 nsf=96: perr=1.075e-03 perr_cor=3.369e-03
+ ===perrMulti_ML 1.059e-03 perrMulti_cor 3.435e-03
+ ===perr2_it_ML  4.647e-04 | 4.538e-04
+ ===perr2_it_cor 4.175e-03 | 4.131e-03
+SUBFRAME=3 m=33 n=282 --> msf=11 nsf=94: perr=8.888e-05 perr_cor=6.465e-04
+ ===perrMulti_ML 8.794e-05 perrMulti_cor 6.354e-04
+ ===perr2_it_ML  4.790e-05 | 4.630e-05
+ ===perr2_it_cor 7.209e-04 | 6.891e-04
+SUBFRAME=3 m=39 n=276 --> msf=13 nsf=92: perr=6.900e-06 perr_cor=1.104e-04
+ ===perrMulti_ML 5.500e-06 perrMulti_cor 1.036e-04
+ ===perr2_it_ML  3.700e-06 | 4.800e-06
+ ===perr2_it_cor 1.169e-04 | 1.256e-04
+SUBFRAME=3 m=45 n=270 --> msf=15 nsf=90: perr=7.000e-07 perr_cor=1.830e-05
+ ===perrMulti_ML 4.000e-07 perrMulti_cor 1.750e-05
+ ===perr2_it_ML  4.000e-07 | 5.000e-07
+ ===perr2_it_cor 2.170e-05 | 2.150e-05
+DONE or Interrupted. Saving data to tpn_SUBFRAME3_N315_rho_tot-1dB_alphaPower1_1e3_18-Mar-2018 19-40-29.mat
