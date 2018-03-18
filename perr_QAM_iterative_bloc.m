@@ -1,3 +1,5 @@
+%%This function is identical to perr_uni_cpx_iterative_bloc() except data
+%%generation
 function perr = perr_QAM_iterative_bloc(k,M,m,n,s,rho,rule,nbiteration,nbframe,SIMUPARAMS)
 
 % if nargin < 6; NTEST = 1e6; end
@@ -11,6 +13,14 @@ N = m+n;
 r = sqrt(n*rho);
 
 rule = 2;
+switch (rule)
+    case SIMUPARAMS.CONST_ML_RULE
+        fmetric = @(y,m,n,rho,s) fmetric_uni_cpx_bloc(y,m,n,rho,s);
+    case SIMUPARAMS.CONST_COR_RULE
+        fmetric = @(y,m,n,rho,s) metric_cor2(y,m,s);
+    otherwise
+        error('Rule(%d) not supported.',rule);
+end
 
 ntest_perbloc = 1000;
 nbloc = ceil(NTEST/ntest_perbloc);
@@ -26,13 +36,19 @@ for ibloc = 1:nbloc
 %     y = x + 1/sqrt(2)*(randn(nbframe*N,ntest_perbloc)+1i*randn(nbframe*N,ntest_perbloc));
     y = circshift(x + 1/sqrt(2)*(randn(nbframe*N,ntest_perbloc)+1i*randn(nbframe*N,ntest_perbloc)),tau0);
     
-    ptau = (1/N)*ones(N,ntest_perbloc);
+    logptau = -log(N)*ones(N,ntest_perbloc);
     for iter = 1:nbiteration
+        temp = zeros(N,size(logptau,2),nbframe);
         for iframe = 1:nbframe
-            ptau = fmetric_alltau_bloc(y((iframe-1)*N+1:(iframe-1)*N+N,:),m,n,rho,s,ptau,rule);
+            yy = y((iframe-1)*N+1:(iframe-1)*N+N,:);
+            temp(1,:,iframe) = fmetric(yy,m,n,rho,s);
+            for tau=1:N-1
+                temp(tau+1,:,iframe) = fmetric(circshift(yy,-tau),m,n,rho,s);
+            end
         end
+        logptau = sum(temp,3) + logptau;
     end
-    nerrs = nerrs + fis_err_bloc(ptau, mod(tau0,N)+1);
+    nerrs = nerrs + fis_err_bloc(logptau, mod(tau0,N)+1);
 
     if (nerrs > min_NERR)
         break;
