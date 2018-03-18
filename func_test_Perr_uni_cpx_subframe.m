@@ -5,6 +5,11 @@ if mod(N,NB_SUBFRAME) ~= 0
 end
 if (nargin < 5); NTEST = 1e6; end
 
+epsilon = 1e-3; %1e-6;
+% cleanUp function
+fname_prefix = sprintf('tpn_SUBFRAME%d_N%d_rho_tot%ddB_alphaPower%d_1e%d',NB_SUBFRAME,N,rho_tot_dB,alpha,-log10(epsilon));
+onExitObj = onCleanup(@()onExitFunc(fname_prefix));
+
 %CONST
 CONST_ML_RULE=1;
 CONST_COR_RULE=2;
@@ -23,13 +28,8 @@ fprintf('TEST FS SUBFRAME: instead of a long SW, use %d short sequences.\n', NB_
 % alpha = 1; %2; %1;
 rho_tot = 10^(rho_tot_dB/10);
 
-epsilon = 1e-3; %1e-6;
 stype = 2; %1 uni, 2 ZC, 3 bin
 sname = {'uni','ZC','bin'};
-
-% cleanUp function
-fname_prefix = sprintf('tpn_SUBFRAME%d_N%d_rho_tot%ddB_alphaPower%d_1e%d',NB_SUBFRAME,N,rho_tot_dB,alpha,-log10(epsilon));
-onExitObj = onCleanup(@()onExitFunc(fname_prefix));
 
 mm = (3:2:15)*NB_SUBFRAME;
 nn = N - mm;
