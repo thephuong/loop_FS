@@ -19,7 +19,7 @@ CONST_COR_RULE=2;
 
 SIMUPARAMS = struct('NTEST',NTEST, ...
     'CONST_ML_RULE',CONST_ML_RULE,'CONST_COR_RULE',CONST_COR_RULE, ...
-    'min_NERR', 100);
+    'min_NERR', 500);
 
 fprintf('TEST FS SUBFRAME: instead of a long SW, use %d short sequences.\n', NB_SUBFRAME);
 
