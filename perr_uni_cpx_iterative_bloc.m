@@ -33,6 +33,7 @@ for ibloc = 1:nbloc
 %     y = x + 1/sqrt(2)*(randn(nbframe*N,ntest_perbloc)+1i*randn(nbframe*N,ntest_perbloc));
     y = circshift(x + 1/sqrt(2)*(randn(nbframe*N,ntest_perbloc)+1i*randn(nbframe*N,ntest_perbloc)),tau0);
     
+%     %Ref solution
 %     ptau = (1/N)*ones(N,ntest_perbloc);
 %     for iter = 1:nbiteration
 %         for iframe = 1:nbframe
@@ -40,10 +41,12 @@ for ibloc = 1:nbloc
 %         end
 %     end
 %     nerrs = nerrs + fis_err_bloc(ptau, mod(tau0,N)+1);
+
+    %sumLog solution
     logptau = -log(N)*ones(N,ntest_perbloc);
     for iter = 1:nbiteration
+        temp = zeros(N,size(logptau,2),nbframe);
         for iframe = 1:nbframe
-            temp = zeros(N,size(logptau,2),nbframe);
 %             logptau = fmetric_log_alltau_bloc(y((iframe-1)*N+1:(iframe-1)*N+N,:),m,n,rho,s,logptau,rule);
             yy = y((iframe-1)*N+1:(iframe-1)*N+N,:);
             temp(1,:,iframe) = fmetric(yy,m,n,rho,s);
