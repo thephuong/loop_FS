@@ -1,3 +1,5 @@
+%% Generate a long sync word [s1 s2 s3 d1 d2 d3] of length N
+% then impose a priori info that frame beginning must occur at somewhere in [s1 d1]
 function perr = perr_uni_cpx_bloc_subframe(m,n,s,rho,rule,NB_SUBFRAME,SIMUPARAMS)
 
 % if nargin < 6; NTEST = 1e6; end
