@@ -6,6 +6,9 @@ end
 if (nargin < 6); NTEST = 1e6; end
 
 epsilon = 1e-3; %1e-6;
+% cleanUp function
+fname_prefix = sprintf('tpn_SUBFRAME%d_QAM%d_N%d_rho_tot%ddB_alphaPower%d_1e%d_%s.mat',NB_SUBFRAME,M,N,rho_tot_dB,alpha,-log10(epsilon));
+onExitObj = onCleanup(@()onExitFunc(fname_prefix));
 
 %Input (saved)
 SAVED = struct('epsilon',epsilon,'N',N,'rho_tot_dB',rho_tot_dB,'alpha',alpha,'NB_SUBFRAME',NB_SUBFRAME);
@@ -96,6 +99,11 @@ if (DO_VISUALIZE)
 end
 
 %% Save
-dtt = datestr(datetime);
-dtt(dtt==':')='-';
-save(sprintf('tpn_SUBFRAME%d_QAM%d_N%d_rho_tot%ddB_alphaPower%d_1e%d_%s.mat',NB_SUBFRAME,M,N,rho_tot_dB,alpha,-log10(epsilon),dtt));
+function onExitFunc(fname_prefix)
+    dtt = datestr(datetime);
+    dtt(dtt==':')='-';
+    fname = sprintf('%s_%s.mat',fname_prefix,dtt);
+    fprintf('DONE or Interrupted. Saving data to %s\n', fname);
+    save(fname);
+end
+end
