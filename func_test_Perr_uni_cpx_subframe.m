@@ -112,6 +112,7 @@ end
 function onExitFunc(fname_prefix)
     dtt = datestr(datetime);
     dtt(dtt==':')='-';
+    dtt(dtt==' ')='_';
     fname = sprintf('%s_%s.mat',fname_prefix,dtt);
     fprintf('DONE or Interrupted. Saving data to %s\n', fname);
     save(fname);
