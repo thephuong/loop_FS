@@ -5,8 +5,12 @@ if mod(N,NB_SUBFRAME) ~= 0
 end
 if (nargin < 6); NTEST = 1e6; end
 
-fprintf('TEST FS SUBFRAME (QAM=%d): instead of a long SW, use %d short sequences.\n',M,NB_SUBFRAME);
+epsilon = 1e-3; %1e-6;
 
+%Input (saved)
+SAVED = struct('epsilon',epsilon,'N',N,'rho_tot_dB',rho_tot_dB,'alpha',alpha,'NB_SUBFRAME',NB_SUBFRAME);
+
+fprintf('TEST FS SUBFRAME (QAM=%d): instead of a long SW, use %d short sequences.\n',M,NB_SUBFRAME);
 % nopt = 90;mopt = 12;
 % N = nopt+mopt;
 % rho_tot_dB = -1;
@@ -14,14 +18,16 @@ fprintf('TEST FS SUBFRAME (QAM=%d): instead of a long SW, use %d short sequences
 % alpha = 1; %2; %1;
 rho_tot = 10^(rho_tot_dB/10);
 
-epsilon = 1e-3; %1e-6;
 stype = 2; %1 uni, 2 ZC, 3 bin
 sname = {'uni','ZC','bin'};
-% descrip = 'N=102 rho=0db real simu of perr sync, s uni with 3db boost, corr rule. perr margin. epsilon=1e-3';
 
 %CONST
 CONST_ML_RULE=1;
 CONST_COR_RULE=2;
+
+SIMUPARAMS = struct('NTEST',NTEST, ...
+    'CONST_ML_RULE',CONST_ML_RULE,'CONST_COR_RULE',CONST_COR_RULE, ...
+    'min_NERR', 100);
 
 mm = (3:2:15)*NB_SUBFRAME;
 nn = N - mm;
@@ -45,7 +51,7 @@ DO_VISUALIZE = 0;
 
 k = 6144;
 
-parfor im = 1:lenmm
+for im = 1:lenmm
 	m = mm(im);
 	n = nn(im);
     msf = m/NB_SUBFRAME;
@@ -54,8 +60,7 @@ parfor im = 1:lenmm
     [ss_sf{im},~] = fGenSyncWord(msf,nsf,rho_tot,alpha,stype);
     
     %real Pe
-%     perr(im) = perr_uni_cpx_bloc(m,n,ss{im},rhoD_tab(im), CONST_ML_RULE, NTEST);
-    perr(im) = perr_QAM_bloc(k,M,m,n,ss{im},rhoD_tab(im), CONST_ML_RULE, NTEST);
+    perr(im) = perr_QAM_bloc_subframe(k,M,m,n,ss{im},rhoD_tab(im),CONST_ML_RULE,NB_SUBFRAME,SIMUPARAMS);
     %real Pe iterative ML rule
 %     perr2_iterative1(im) = perr_uni_cpx_iterative_bloc(msf,nsf,ss_sf{im},rhoD_tab(im), CONST_ML_RULE, NTEST, 1,NB_SUBFRAME);
 %     perr2_iterative2(im) = perr_uni_cpx_iterative_bloc(msf,nsf,ss_sf{im},rhoD_tab(im), CONST_ML_RULE, NTEST, 2,NBFRAME);

@@ -1,13 +1,15 @@
-function perr = perr_QAM_bloc_subframe(k,M,m,n,s,rho,rule,NTEST)
+function perr = perr_QAM_bloc_subframe(k,M,m,n,s,rho,rule,NB_SUBFRAME,SIMUPARAMS)
 
-if nargin < 8; NTEST = 1e6; end
-if nargin < 7; rule = 2; NTEST = 1e6; end
+% if nargin < 8; NTEST = 1e6; end
+% if nargin < 7; rule = 2; NTEST = 1e6; end
+
+NTEST = SIMUPARAMS.NTEST;
+min_NERR = SIMUPARAMS.min_NERR;
 
 rule = 2; %only CORR rule until ML rule is found
 
 if (~ismember(M,[1,2,4,6,8]))
     error('M=%d must be 1,2,4,6,8 !!!');
-%     M = 2;
 end
 
 N = m+n;
@@ -32,7 +34,7 @@ for ibloc = 1:nbloc
 %     end
     nerr = nerr + fis_err_bloc(metrictau_bloc,tau0+1);
 
-    if (nerr > 500)
+    if (nerr > min_NERR)
         break;
     end
 end
