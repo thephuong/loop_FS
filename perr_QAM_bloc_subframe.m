@@ -17,6 +17,25 @@ end
 N = m+n;
 r = sqrt(n*rho);
 
+switch (rule)
+    case SIMUPARAMS.CONST_ML_RULE
+        fmetric = @(yy,m,n,rho,s) fmetric_uni_cpx_bloc(yy,m,n,rho,s);
+    case SIMUPARAMS.CONST_COR_RULE
+        fmetric = @(yy,m,n,rho,s) fmetric_cor_cpx_bloc(yy,m,s);
+    otherwise
+        error('Rule(%d) not supported.',rule);
+end
+
+N_SUBFRAME = N/NB_SUBFRAME;
+%a priori information of the position of beginning of subframe
+%to be fair in comparison with interative algo
+tauval1 = 1;
+tauval2 = m/NB_SUBFRAME;
+tauval3 = m+1;
+tauval4 = m+n/NB_SUBFRAME;
+tauvals_tau0 = [tauval1:tauval2 tauval3:tauval4]-1;
+EXPECTED_TAUHAT=1;
+
 ntest_perbloc = 1000;
 nbloc = ceil(NTEST/ntest_perbloc);
 sbloc = repmat(s,1,ntest_perbloc);
@@ -25,17 +44,15 @@ for ibloc = 1:nbloc
     y = [sbloc; fGen_lteQAM_Vec_cpx_bloc(k,M,n,r,ntest_perbloc)] + 1/sqrt(2)*(randn(N,ntest_perbloc)+1i*randn(N,ntest_perbloc));
     tau0 = randi(N) - 1;
     y = circshift(y,tau0);
-    metrictau_bloc = zeros(N,ntest_perbloc);
-%     switch (rule)
-%         case 1
-%             for tau = 0:N-1; metrictau_bloc(tau+1,:) = fmetric_uni_cpx_bloc(circshift(y,-tau),m,n,rho,s); end
-%         case 2
-            for tau = 0:N-1; metrictau_bloc(tau+1,:) = fmetric_cor_cpx_bloc(circshift(y,-tau),m,s); end
-%         otherwise
-%             for tau = 0:N-1; metrictau_bloc(tau+1,:) = metric_test(circshift(y,-tau),m,n,rho,s); end
-%     end
-    nerr = nerr + fis_err_bloc(metrictau_bloc,tau0+1);
-
+    %Metric
+    tauvals = mod(tauvals_tau0+tau0,N);
+    metrictau_bloc = zeros(N_SUBFRAME,ntest_perbloc);
+    for itau = 1:length(tauvals)
+        tau = tauvals(itau);
+        metrictau_bloc(itau,:) = fmetric(circshift(y,-tau),m,n,rho,s);
+    end
+    %Error calculation
+    nerr = nerr + fis_err_bloc(metrictau_bloc,EXPECTED_TAUHAT);
     if (nerr > min_NERR)
         break;
     end
