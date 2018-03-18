@@ -43,15 +43,15 @@ for ibloc = 1:nbloc
     logptau = -log(N)*ones(N,ntest_perbloc);
     for iter = 1:nbiteration
         for iframe = 1:nbframe
+            temp = zeros(N,size(logptau,2),nbframe);
 %             logptau = fmetric_log_alltau_bloc(y((iframe-1)*N+1:(iframe-1)*N+N,:),m,n,rho,s,logptau,rule);
             yy = y((iframe-1)*N+1:(iframe-1)*N+N,:);
-            temp = zeros(N,size(logptau,2));
-            temp(1,:) = fmetric(yy,m,n,rho,s);
+            temp(1,:,iframe) = fmetric(yy,m,n,rho,s);
             for tau=1:N-1
-                temp(tau+1,:) = fmetric(circshift(yy,-tau),m,n,rho,s);
+                temp(tau+1,:,iframe) = fmetric(circshift(yy,-tau),m,n,rho,s);
             end
-            logptau = temp + logptau;
         end
+        logptau = logptau + sum(temp,3);
     end
     nerrs = nerrs + fis_err_bloc(logptau, mod(tau0,N)+1);
 
