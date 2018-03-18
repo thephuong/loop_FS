@@ -10,14 +10,16 @@ epsilon = 1e-3; %1e-6;
 fname_prefix = sprintf('tpn_SUBFRAME%d_N%d_rho_tot%ddB_alphaPower%d_1e%d',NB_SUBFRAME,N,rho_tot_dB,alpha,-log10(epsilon));
 onExitObj = onCleanup(@()onExitFunc(fname_prefix));
 
+%Input (saved)
+SAVED = struct('epsilon',epsilon,'N',N,'rho_tot_dB',rho_tot_dB,'alpha',alpha,'NB_SUBFRAME',NB_SUBFRAME);
+
 %CONST
 CONST_ML_RULE=1;
 CONST_COR_RULE=2;
 
-SIMUPARAMS.NTEST = NTEST;
-SIMUPARAMS.min_NERR = 100;
-SIMUPARAMS.CONST_ML_RULE = 1;
-SIMUPARAMS.CONST_COR_RULE = 2;
+SIMUPARAMS = struct('NTEST',NTEST, ...
+    'CONST_ML_RULE',CONST_ML_RULE,'CONST_COR_RULE',CONST_COR_RULE, ...
+    'min_NERR', 100);
 
 fprintf('TEST FS SUBFRAME: instead of a long SW, use %d short sequences.\n', NB_SUBFRAME);
 
