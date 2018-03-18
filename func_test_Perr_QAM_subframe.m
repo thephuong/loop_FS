@@ -66,7 +66,7 @@ for im = 1:lenmm
 %     perr2_iterative2(im) = perr_uni_cpx_iterative_bloc(msf,nsf,ss_sf{im},rhoD_tab(im), CONST_ML_RULE, NTEST, 2,NBFRAME);
 %     perr2_iterative4(im) = perr_uni_cpx_iterative_bloc(msf,nsf,ss_sf{im},rhoD_tab(im), CONST_ML_RULE, NTEST, 4,NB_SUBFRAME);
     %real Pe iterative CORR rule
-    perr2_cor_iterative1(im) = perr_QAM_iterative_bloc(k,M,msf,nsf,ss_sf{im},rhoD_tab(im), CONST_COR_RULE, NTEST, 1,NB_SUBFRAME);
+    perr2_cor_iterative1(im) = perr_QAM_iterative_bloc(k,M,msf,nsf,ss_sf{im},rhoD_tab(im),CONST_COR_RULE,1,NB_SUBFRAME,SIMUPARAMS);
 %     perr2_cor_iterative2(im) = perr_uni_cpx_iterative_bloc(msf,nsf,ss_sf{im},rhoD_tab(im), CONST_COR_RULE, NTEST, 2,NBFRAME);
 %     perr2_cor_iterative4(im) = perr_uni_cpx_iterative_bloc(msf,nsf,ss_sf{im},rhoD_tab(im), CONST_COR_RULE, NTEST, 4,NB_SUBFRAME);
 %     fprintf('m=%d perr=%.3e perr2v2=%.3e (trunc=%.3e) : perr2=%.3e\n ===perr2_it_ML  %.3e | %.3e | %.3e\n ===perr2_it_cor %.3e | %.3e | %.3e\n', ...
