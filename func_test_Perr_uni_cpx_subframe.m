@@ -93,17 +93,23 @@ end
 
 %% Visualize
 if (DO_VISUALIZE)
+    %Correlation rule
     figure;
-    semilogy(mm,perr2v2,'r--','LineWidth',1.5);
+    semilogy(mm,perr_cor,'r-');
     hold on; grid on;
-    semilogy(mm,perr,'r:','LineWidth',1.5);
-    semilogy(mm,perr2_iterative1,'bo-');
-    semilogy(mm,perr2_iterative4,'bd-');
+    semilogy(mm,perr2_cor,'r--');
     semilogy(mm,perr2_cor_iterative1,'bo--');
-    semilogy(mm,perr2_cor_iterative4,'bd--');
-    legend(sprintf('ZC %dm-length',NB_SUBFRAME),'ZC m-length', ...
-        'iterative-ML 1 iteration','iterative-ML 4 iterations', ...
-        'iterative-Corr 1 iteration','iterative-Corr 4 iterations');
+    semilogy(mm,perr2_cor_iterative4,'b+--');
+
+    figure
+    semilogy(mm,perr,'r>-');
+    hold on; grid on;
+    semilogy(mm,perr2,'r*-');
+    semilogy(mm,perr2_iterative1,'bo-');
+    semilogy(mm,perr2_iterative4,'bs-');
+%     legend(sprintf('ZC %dm-length',NB_SUBFRAME),'ZC m-length', ...
+%         'iterative-ML 1 iteration','iterative-ML 4 iterations', ...
+%         'iterative-Corr 1 iteration','iterative-Corr 4 iterations');
     xlabel('SW length m');
     ylabel('FS error P_e');
 end
