@@ -1,4 +1,4 @@
-function perr = perr_QAM_bloc(k,M,m,n,s,rho,rule,NTEST)
+function perr = perr_QAM_bloc_subframe(k,M,m,n,s,rho,rule,NTEST)
 
 if nargin < 8; NTEST = 1e6; end
 if nargin < 7; rule = 2; NTEST = 1e6; end
