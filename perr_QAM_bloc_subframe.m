@@ -8,7 +8,7 @@ function perr = perr_QAM_bloc_subframe(k,M,m,n,s,rho,rule,NB_SUBFRAME,SIMUPARAMS
 NTEST = SIMUPARAMS.NTEST;
 min_NERR = SIMUPARAMS.min_NERR;
 
-rule = 2; %only CORR rule until ML rule is found
+rule = SIMUPARAMS.CONST_COR_RULE; %only CORR rule until ML rule is found
 
 if (~ismember(M,[1,2,4,6,8]))
     error('M=%d must be 1,2,4,6,8 !!!');

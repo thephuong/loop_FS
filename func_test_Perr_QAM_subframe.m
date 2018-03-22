@@ -30,7 +30,7 @@ CONST_COR_RULE=2;
 
 SIMUPARAMS = struct('NTEST',NTEST, ...
     'CONST_ML_RULE',CONST_ML_RULE,'CONST_COR_RULE',CONST_COR_RULE, ...
-    'min_NERR', 100);
+    'min_NERR', 500);
 
 mm = (3:2:15)*NB_SUBFRAME;
 nn = N - mm;
@@ -39,7 +39,8 @@ lenmm = length(mm);
 ss = cell(lenmm,1);
 rhoD_tab = zeros(lenmm,1);
 
-perr = zeros(lenmm,1);         %sync error, optimum rule, sim
+perr_cor = zeros(lenmm,1);      %sync error, optimum rule, sim
+perr2_cor = zeros(lenmm,1);     %FS error,a long s = multiple short s, cor rule
 ss_sf = cell(lenmm,1);
 
 perr2_iterative1 = zeros(lenmm,1);
@@ -63,7 +64,8 @@ for im = 1:lenmm
     [ss_sf{im},~] = fGenSyncWord(msf,nsf,rho_tot,alpha,stype);
     
     %real Pe
-    perr(im) = perr_QAM_bloc_subframe(k,M,m,n,ss{im},rhoD_tab(im),CONST_ML_RULE,NB_SUBFRAME,SIMUPARAMS);
+    perr_cor(im) = perr_QAM_bloc_subframe(k,M,m,n,ss{im},rhoD_tab(im),CONST_ML_RULE,NB_SUBFRAME,SIMUPARAMS);
+    perr2_cor(im) = perr_QAM_bloc_subframe(k,M,m,n,repmat(ss_sf{im},NB_SUBFRAME,1),rhoD_tab(im),CONST_COR_RULE,NB_SUBFRAME,SIMUPARAMS);
     %real Pe iterative ML rule
 %     perr2_iterative1(im) = perr_uni_cpx_iterative_bloc(msf,nsf,ss_sf{im},rhoD_tab(im), CONST_ML_RULE, NTEST, 1,NB_SUBFRAME);
 %     perr2_iterative2(im) = perr_uni_cpx_iterative_bloc(msf,nsf,ss_sf{im},rhoD_tab(im), CONST_ML_RULE, NTEST, 2,NBFRAME);
@@ -71,13 +73,13 @@ for im = 1:lenmm
     %real Pe iterative CORR rule
     perr2_cor_iterative1(im) = perr_QAM_iterative_bloc(k,M,msf,nsf,ss_sf{im},rhoD_tab(im),CONST_COR_RULE,1,NB_SUBFRAME,SIMUPARAMS);
 %     perr2_cor_iterative2(im) = perr_uni_cpx_iterative_bloc(msf,nsf,ss_sf{im},rhoD_tab(im), CONST_COR_RULE, NTEST, 2,NBFRAME);
-%     perr2_cor_iterative4(im) = perr_uni_cpx_iterative_bloc(msf,nsf,ss_sf{im},rhoD_tab(im), CONST_COR_RULE, NTEST, 4,NB_SUBFRAME);
+    perr2_cor_iterative4(im) = perr_uni_cpx_iterative_bloc(msf,nsf,ss_sf{im},rhoD_tab(im), CONST_COR_RULE,4,NB_SUBFRAME,SIMUPARAMS);
 %     fprintf('m=%d perr=%.3e perr2v2=%.3e (trunc=%.3e) : perr2=%.3e\n ===perr2_it_ML  %.3e | %.3e | %.3e\n ===perr2_it_cor %.3e | %.3e | %.3e\n', ...
 %         m,perr(im),perr2v2(im),perr2v2_trunc(im),perr2(im), ...
 %         perr2_iterative1(im),perr2_iterative2(im),perr2_iterative4(im), ...
 %         perr2_cor_iterative1(im),perr2_cor_iterative2(im),perr2_cor_iterative4(im));
-    fprintf('SUBFRAME=%d (QAM=%d k=%d) m=%d n=%d --> msf=%d nsf=%d: perr=%.3e\n ===perr2_it_cor %.3e | %.3e\n', ...
-        NB_SUBFRAME,M,k,m,n,msf,nsf,perr(im), ...
+    fprintf('SUBFRAME=%d (QAM=%d k=%d) m=%d n=%d --> msf=%d nsf=%d: perr_cor=%.3e perr2_cor=%.3e\n ===perr2_it_cor %.3e | %.3e\n', ...
+        NB_SUBFRAME,M,k,m,n,msf,nsf,perr_cor(im),perr2_cor(im), ...
         perr2_cor_iterative1(im),perr2_cor_iterative4(im));
 end
 
@@ -86,7 +88,7 @@ if (DO_VISUALIZE)
     figure;
     semilogy(mm,perr2v2,'r--','LineWidth',1.5);
     hold on; grid on;
-    semilogy(mm,perr,'r:','LineWidth',1.5);
+    semilogy(mm,perr_cor,'r:','LineWidth',1.5);
     semilogy(mm,perr2_iterative1,'bo-');
     semilogy(mm,perr2_iterative4,'bd-');
     semilogy(mm,perr2_cor_iterative1,'bo--');
