@@ -1,6 +1,6 @@
 clear all
 
-n = 10;
+n = 20;
 m = randi(n);
 
 rhodB = 0;
@@ -26,11 +26,10 @@ for i = 1:NTEST
     histoo(i) = real(d(1));
 end
 
+DISP_FACTOR=1; HISTOBIN=40;
 figure;
-hh = histogram(histo);
-title(sprintf('Histogram of D_{0r} n=%d rho=%ddB',n,rhodB));
-
-DISP_FACTOR=2;
+hh = histogram(histo,HISTOBIN);
+title(sprintf('Histogram of D_{0r}, n=%d, rho=%ddB',n,rhodB));
 xx = hh.BinLimits(1):DISP_FACTOR*hh.BinWidth:hh.BinLimits(2);
 pxx = 1/norm(s)/sqrt(n*rho) * 1/beta(n-0.5,0.5) * (1-xx.^2/(norm(s)^2*n*rho)).^(n-1.5);
 hold on;
@@ -38,6 +37,17 @@ plot(xx(1:2:end),pxx(1:2:end)*hh.BinWidth*NTEST,'ro','LineWidth',1);
 %normal approx
 pnx = normpdf(xx,0,norm(s)*sqrt(n*rho/(2*n-3)));
 plot(xx(2:2:end),pnx(2:2:end)*hh.BinWidth*NTEST,'m+','LineWidth',2);
+legend('histogram','Beta PDF','Normal approximation');
+
+figure;
+hh = histogram(histo,HISTOBIN,'Normalization','pdf');
+xx = hh.BinLimits(1):DISP_FACTOR*hh.BinWidth:hh.BinLimits(2);
+pxx = 1/norm(s)/sqrt(n*rho) * 1/beta(n-0.5,0.5) * (1-xx.^2/(norm(s)^2*n*rho)).^(n-1.5);
+pnx = normpdf(xx,0,norm(s)*sqrt(n*rho/(2*n-3)));
+title(sprintf('Histogram of D_{0r}, n=%d, rho=%ddB',n,rhodB));
+hold on;
+plot(xx(1:2:end),pxx(1:2:end),'ro','LineWidth',1);
+plot(xx(2:2:end),pnx(2:2:end),'m+','LineWidth',2);
 legend('histogram','Beta PDF','Normal approximation');
 
 % figure;
