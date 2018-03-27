@@ -26,7 +26,13 @@ for ifile = 1:nfiles
     
     perrcorr_mat=[perrcorr_mat perrcorr];
     perra_corr_mat=[perra_corr_mat sum(perramargin,2)];
-%     epsilonD = qfunc((nn(:).*log2(1+rhoD_tab(:)) + 0.5*log2(2*nn(:)) - nbits) ./ sqrt(nn(:).*rhoD_tab(:).*(rhoD_tab(:)+2)./(rhoD_tab(:)+1).^2));
+    
+    k = 51;
+    nreal = 2*nn(:);
+    rhot = rhoD_tab(:);
+    C = 0.5*log2(1+rhot);
+    V = rhot .* (2+rhot)/2 ./ (1+rhot).^2;
+    ed = qfunc((nreal.*C + 0.5*log2(nreal) - k) ./ sqrt(nreal.*V) / log2(exp(1)));
     ed_mat=[ed_mat ed];
     
     debit_ml_tab = [debit_ml_tab debit(:)];
@@ -77,3 +83,14 @@ semilogy(alpha_tab,pea_ml(im,:),'r*');
 semilogy(alpha_tab,pea(im,:),'r+');
 xlabel('\alpha = \rho_s/\rho');
 title('(b) Overall frame error P_f');
+
+figure;
+semilogy(alpha_tab,pe_ml(im,:),'b-');
+hold on; grid on;
+semilogy(alpha_tab,pec(im,:),'b--');
+semilogy(alpha_tab,pea_ml(im,:),'r*');
+semilogy(alpha_tab,pea(im,:),'r+');
+xlabel('\alpha = \rho_s/\rho');
+ylabel('P_f');
+title('Frame error P_f');
+legend('Simulation ML rule (f_O)','Estimation ML rule (f_A)','Simulation correlation rule','Estimation correlation rule');
