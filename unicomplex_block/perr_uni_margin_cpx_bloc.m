@@ -11,7 +11,8 @@ sbloc = repmat(s,1,ntest_perbloc);
 for tau=1:N-1
     nerr = 0;
     for ibloc = 1:nbloc
-        y = [sbloc; fGenUniVec_cpx_bloc(n,r,ntest_perbloc)] + 1/sqrt(2)*(randn(N,ntest_perbloc)+1i*randn(N,ntest_perbloc));
+        y = [sbloc; fGenUniVec_cpx_bloc(n,r,ntest_perbloc, -1)] + ...
+            1/sqrt(2)*(randn(N,ntest_perbloc)+1i*randn(N,ntest_perbloc));
         %this -tau is tricky to follow convention
         switch (rule)
             case 1
