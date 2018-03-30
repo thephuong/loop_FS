@@ -16,7 +16,13 @@ switch tau_frac
     case 0
         return;
     case -1
-        % To implement random fraction
+        % Random fraction
+        w1 = 1/sqrt(2) * (randn(n,ntest_perbloc) + 1i * randn(n,ntest_perbloc));
+        d1 = r * w1 ./ repmat(fvecwisenorm(w1),n,1);
+        for ivec = 1:ntest_perbloc
+            ttau_frac = randi(n)-1;
+            d(n-ttau_frac+1:n,ivec) = d1(n-ttau_frac+1:n,ivec);
+        end
     otherwise
         w1 = 1/sqrt(2) * (randn(n,ntest_perbloc) + 1i * randn(n,ntest_perbloc));
         d1 = r * w1 ./ repmat(fvecwisenorm(w1),n,1);
