@@ -1,4 +1,5 @@
 function d = fGenUniVec_cpx_bloc(n,r,ntest_perbloc)
+addpath(genpath('../unitfuncs/'));
 w = 1/sqrt(2) * (randn(n,ntest_perbloc) + 1i * randn(n,ntest_perbloc));
 normw = repmat(fvecwisenorm(w),n,1);
 d = r * w ./ normw;
