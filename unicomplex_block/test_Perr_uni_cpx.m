@@ -1,4 +1,5 @@
 clear all
+addpath(genpath('../unitfuncs/'));
 nopt = 90;mopt = 12;
 N = nopt+mopt;
 rho_tot_dB = -1;
@@ -69,20 +70,14 @@ parfor im = 1:lenmm
         perra(im) = sum(perramargin(im,:),2);
         perramargin_ML(im,:) = fpredict_perr_uni_margin_ML_cpx(ss{im},m,n,rhoD_tab(im));
     end
-    
-%     rhoreal = rho/2;
-    rhoreal = rhoD_tab(im); %the power is divised by 2, but noise also then SNR does not change.
-    nreal = n*2;
-    V = rhoreal*(2+rhoreal)/2/(1+rhoreal)^2;
-    C = 0.5*log2(1+rhoreal);
-    R(im) = C - (V./nreal).^0.5*log2(exp(1))*qfuncinv(epsilon) + 0.5*log2(nreal)./nreal;
-	
+
 	fprintf('m=%d DONE ..\n',m);
 end
 
+nnt = nn(:);
+R = k_D_cpx(epsilon,nn,rhoD_tab) ./ nnt;
 nbits = 51;
-nnt = nn.';
-ed = qfunc((nnt.*log2(1+rhoD_tab) + 0.5*log2(2*nnt) - nbits) ./ sqrt(nnt.*rhoD_tab.*(rhoD_tab+2)./(rhoD_tab+1).^2));
+ed = epsilon_D_cpx(nbits,nn,rhoD_tab);
 
 % %% Data
 % rhoreal = rho/2;
@@ -96,10 +91,10 @@ ed = qfunc((nnt.*log2(1+rhoD_tab) + 0.5*log2(2*nnt) - nbits) ./ sqrt(nnt.*rhoD_t
 Rc = max(0,R);
 perrac = min(1,perra);
 perraMLc = min(1,sum(perramargin_ML,2));
-debit = (1-perr).' .* Rc .* nn;
-debitcorr = (1-perrcorr).' .* Rc .* nn;
-debita = (1-perrac).' .* Rc .* nn;
-debita_ML = (1-perraMLc).' .* Rc .* nn;
+debit = (1-perr(:)) .* Rc .* nn(:);
+debitcorr = (1-perrcorr(:)) .* Rc .* nnt;
+debita = (1-perrac(:)) .* Rc .* nnt;
+debita_ML = (1-perraMLc(:)) .* Rc .* nnt;
 
 MKERSIZE = 5; MKERSIZE_BIG = 5;
 LWIDTH = 1; LWIDTH_BOLD = 1;
