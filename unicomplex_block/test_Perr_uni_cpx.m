@@ -43,7 +43,6 @@ perrmargin = zeros(lenmm,N-1);      %Pe at tau, sim, corr rule
 perra = zeros(lenmm,1);        %Pe,union, theory
 perramargin = zeros(lenmm,N-1);%Pe at tau, theory
 perramargin_ML = zeros(lenmm,N-1);%Pe at tau, theory, ML
-R = zeros(1,lenmm);
 
 parfor im = 1:lenmm
 	m = mm(im);
