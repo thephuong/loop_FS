@@ -1,3 +1,4 @@
+%% Create anonymous functions for data generation and for metric
 function [fmetric,fGenData] = anonymous_func_selection(rule,dataType,SIMUPARAMS)
 switch (dataType)
     case SIMUPARAMS.CONST_dataType_UNISPHERE
