@@ -25,6 +25,7 @@ mm = 3:2:28;%3:2:32;%floor(N/2);
 nn = N - mm;
 lenmm = length(mm);
 DATA_TYPE=CONST_dataType_UNISPHERE;
+data_type_str = dataTypeName{DATA_TYPE};
 
 SIMUPARAMS = struct('NTEST',NTEST, ...
     'CONST_ML_RULE',CONST_ML_RULE,'CONST_COR_RULE',CONST_COR_RULE, ...
@@ -89,7 +90,10 @@ parfor im = 1:lenmm
         end
     end
 
-	fprintf('m=%d DONE ..\n',m);
+	fprintf(['m=%d DONE Data=%s ..\n', ...
+        'ML  %.3e %.3e %.3e\n', ...
+        'cor %.3e %.3e %.3e\n'], m, data_type_str, perr(im),sum(perr_margin_ML(im,:),2),perr_a_ML(im), ...
+        perrcorr(im),sum(perr_margin_cor(im,:),2),perr_a_cor(im));
 end
 
 nnt = nn(:);
@@ -146,34 +150,46 @@ semilogy(mm,1-(1-min(perr_a_cor,1)).*(1-ed),'m+');
 legend('P_f ML','predicted P_f ML','P_f corr','predicted P_f corr');
 
 %Corr rule
-figure; im=3;
-semilogy(perr_margin_cor(im,:),'bo-');
-hold on; grid on;
-semilogy(perr_a_margin_cor(im,:),'r*--');
-title(['Corr rule. P_e(\tau).' sprintf('m=%d n=%d alpha=%d rhoTotdB=%d',mm(im),nn(im),alpha,rho_tot_dB)]);
-legend('Sim','Theory');
+im=3;
+if (im <= lenmm)
+    figure;
+    semilogy(perr_margin_cor(im,:),'bo-');
+    hold on; grid on;
+    semilogy(perr_a_margin_cor(im,:),'r*--');
+    title(['Corr rule. P_e(\tau).' sprintf('m=%d n=%d alpha=%d rhoTotdB=%d',mm(im),nn(im),alpha,rho_tot_dB)]);
+    legend('Sim','Theory');
+end
 %Corr rule
-figure; im=10;
-semilogy(perr_margin_cor(im,:),'bo-');
-hold on; grid on;
-semilogy(perr_a_margin_cor(im,:),'r*--');
-title(['Corr rule. P_e(\tau).' sprintf('m=%d n=%d alpha=%d rhoTotdB=%d',mm(im),nn(im),alpha,rho_tot_dB)]);
-legend('Sim','Theory');
+im=10;
+if (im <= lenmm)
+    figure;
+    semilogy(perr_margin_cor(im,:),'bo-');
+    hold on; grid on;
+    semilogy(perr_a_margin_cor(im,:),'r*--');
+    title(['Corr rule. P_e(\tau).' sprintf('m=%d n=%d alpha=%d rhoTotdB=%d',mm(im),nn(im),alpha,rho_tot_dB)]);
+    legend('Sim','Theory');
+end
 
 %ML rule
-figure; im=3;
-semilogy(perr_margin_ML(im,:),'bo-');
-hold on; grid on;
-semilogy(perr_a_margin_ML(im,:),'r*--');
-title(['ML rule. P_e(\tau).' sprintf('m=%d n=%d alpha=%d rhoTotdB=%d',mm(im),nn(im),alpha,rho_tot_dB)]);
-legend('Sim','Theory');
+im=3;
+if (im <= lenmm)
+    figure;
+    semilogy(perr_margin_ML(im,:),'bo-');
+    hold on; grid on;
+    semilogy(perr_a_margin_ML(im,:),'r*--');
+    title(['ML rule. P_e(\tau).' sprintf('m=%d n=%d alpha=%d rhoTotdB=%d',mm(im),nn(im),alpha,rho_tot_dB)]);
+    legend('Sim','Theory');
+end
 %ML rule
-figure; im=10;
-semilogy(perr_margin_ML(im,:),'bo-');
-hold on; grid on;
-semilogy(perr_a_margin_ML(im,:),'r*--');
-title(['ML rule. P_e(\tau).' sprintf('m=%d n=%d alpha=%d rhoTotdB=%d',mm(im),nn(im),alpha,rho_tot_dB)]);
-legend('Sim','Theory');
+im=10;
+if (im <= lenmm)
+    figure;
+    semilogy(perr_margin_ML(im,:),'bo-');
+    hold on; grid on;
+    semilogy(perr_a_margin_ML(im,:),'r*--');
+    title(['ML rule. P_e(\tau).' sprintf('m=%d n=%d alpha=%d rhoTotdB=%d',mm(im),nn(im),alpha,rho_tot_dB)]);
+    legend('Sim','Theory');
+end
 
 %% Save
 if (IS_PREDICT_ONLY >= 3)
