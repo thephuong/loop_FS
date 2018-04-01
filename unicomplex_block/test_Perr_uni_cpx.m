@@ -42,12 +42,12 @@ rhoD_tab = zeros(lenmm,1);
 perr = zeros(lenmm,1);         %sync error, optimum rule, sim
 perrcorr = zeros(lenmm,1);     %sync error, corr rule, sim
 
-perrmargin_ML = zeros(lenmm,N-1);   %Pe at tau, sim, ML
-perrmargin = zeros(lenmm,N-1);      %Pe at tau, sim, corr rule
+perr_margin_ML = zeros(lenmm,N-1);   %Pe at tau, sim, ML
+perr_margin = zeros(lenmm,N-1);      %Pe at tau, sim, corr rule
 
 perra = zeros(lenmm,1);        %Pe,union, theory
-perramargin = zeros(lenmm,N-1);%Pe at tau, theory
-perramargin_ML = zeros(lenmm,N-1);%Pe at tau, theory, ML
+perr_a_margin = zeros(lenmm,N-1);%Pe at tau, theory
+perr_a_margin_ML = zeros(lenmm,N-1);%Pe at tau, theory, ML
 
 parfor im = 1:lenmm
 	m = mm(im);
@@ -68,15 +68,21 @@ parfor im = 1:lenmm
     if (IS_PREDICT_ONLY >= 3)
 %         perrmargin_ML(im,:) = perr_uni_margin_ML_cpx(m,n,ss{im},rhoD_tab(im),NTEST);
 %         perrmargin(im,:) = perr_uni_margin_corr_cpx(m,n,ss{im},rhoD_tab(im),NTEST);
-        perrmargin_ML(im,:) = perr_uni_margin_cpx_bloc(m,n,ss{im},rhoD_tab(im),CONST_ML_RULE,SIMUPARAMS);
-        perrmargin(im,:) = perr_uni_margin_cpx_bloc(m,n,ss{im},rhoD_tab(im),CONST_COR_RULE,SIMUPARAMS);
+        perr_margin_ML(im,:) = perr_uni_margin_cpx_bloc(m,n,ss{im},rhoD_tab(im),CONST_ML_RULE,DATA_TYPE, SIMUPARAMS);
+        perr_margin(im,:) = perr_uni_margin_cpx_bloc(m,n,ss{im},rhoD_tab(im),CONST_COR_RULE,DATA_TYPE, SIMUPARAMS);
     end
 
     %theoretical Pe(tau)
     if (IS_PREDICT_ONLY >= 1)
-        perramargin(im,:) = fpredict_perr_uni_margin_corr_cpx(ss{im},m,n,rhoD_tab(im));
-        perra(im) = sum(perramargin(im,:),2);
-        perramargin_ML(im,:) = fpredict_perr_uni_margin_ML_cpx(ss{im},m,n,rhoD_tab(im));
+        if (DATA_TYPE == CONST_dataType_UNISPHERE)
+            perr_a_margin(im,:) = fpredict_perr_uni_margin_corr_cpx(ss{im},m,n,rhoD_tab(im));
+            perra(im) = sum(perr_a_margin(im,:),2);
+            perr_a_margin_ML(im,:) = fpredict_perr_uni_margin_ML_cpx(ss{im},m,n,rhoD_tab(im));
+        else
+            perr_a_margin(im,:) = fpredict_perr_Normal_margin_corr_cpx(ss{im},m,n,rhoD_tab(im));
+            perra(im) = sum(perr_a_margin(im,:),2);
+            perr_a_margin_ML(im,:) = fpredict_perr_Normal_margin_ML_cpx(ss{im},m,n,rhoD_tab(im));
+        end
     end
 
 	fprintf('m=%d DONE ..\n',m);
@@ -98,7 +104,7 @@ ed = epsilon_D_cpx(nbits,nn,rhoD_tab);
 %% Visualize
 Rc = max(0,R);
 perrac = min(1,perra);
-perraMLc = min(1,sum(perramargin_ML,2));
+perraMLc = min(1,sum(perr_a_margin_ML,2));
 debit = (1-perr(:)) .* Rc .* nn(:);
 debitcorr = (1-perrcorr(:)) .* Rc .* nnt;
 debita = (1-perrac(:)) .* Rc .* nnt;
@@ -109,10 +115,10 @@ LWIDTH = 1; LWIDTH_BOLD = 1;
 figure;
 semilogy(mm,perr,'b-');%,'LineWidth',LWIDTH);
 hold on; grid on;
-semilogy(mm,sum(perrmargin_ML,2),'ro');%,'LineWidth',LWIDTH,'MarkerSize',MKERSIZE_BIG);
-semilogy(mm,sum(perramargin_ML,2),'m*');%,'LineWidth',LWIDTH_BOLD,'MarkerSize',MKERSIZE);
+semilogy(mm,sum(perr_margin_ML,2),'ro');%,'LineWidth',LWIDTH,'MarkerSize',MKERSIZE_BIG);
+semilogy(mm,sum(perr_a_margin_ML,2),'m*');%,'LineWidth',LWIDTH_BOLD,'MarkerSize',MKERSIZE);
 semilogy(mm,perrcorr,'b--','LineWidth', LWIDTH);
-semilogy(mm,sum(perrmargin,2),'rs');%,'LineWidth',LWIDTH,'MarkerSize',MKERSIZE_BIG);
+semilogy(mm,sum(perr_margin,2),'rs');%,'LineWidth',LWIDTH,'MarkerSize',MKERSIZE_BIG);
 semilogy(mm,perra,'m+');%,'LineWidth',LWIDTH_BOLD,'MarkerSize',MKERSIZE);
 legend('Pe ML rule','Pe,union ML (sim)','Pe,union ML (predicted)',...
     'Pe cor rule','Pe,union cor (sim)','Pe,union cor (predicted)');
@@ -130,22 +136,22 @@ title(sprintf('N=%d alpha=%d rhoTot=%ddB,s %s,D uni',N,alpha,rho_tot_dB,sname{st
 figure
 semilogy(mm,1-(1-perr).*(1-ed));
 hold on; grid on;
-semilogy(mm,1-(1-min(sum(perramargin_ML,2),1)).*(1-ed),'m*');
+semilogy(mm,1-(1-min(sum(perr_a_margin_ML,2),1)).*(1-ed),'m*');
 semilogy(mm,1-(1-perrcorr).*(1-ed),'b--');
-semilogy(mm,1-(1-min(sum(perramargin,2),1)).*(1-ed),'m+');
+semilogy(mm,1-(1-min(sum(perr_a_margin,2),1)).*(1-ed),'m+');
 legend('P_f ML','predicted P_f ML','P_f corr','predicted P_f corr');
 
 figure; im=3;
-semilogy(perrmargin(im,:),'bo-');
+semilogy(perr_margin(im,:),'bo-');
 hold on; grid on;
-semilogy(perramargin(im,:),'r*--');
+semilogy(perr_a_margin(im,:),'r*--');
 title(['P_e(\tau).' sprintf('m=%d n=%d alpha=%d rhoTotdB=%d',mm(im),nn(im),alpha,rho_tot_dB)]);
 legend('Sim','Theory');
 
 figure; im=10;
-semilogy(perrmargin(im,:),'bo-');
+semilogy(perr_margin(im,:),'bo-');
 hold on; grid on;
-semilogy(perramargin(im,:),'r*--');
+semilogy(perr_a_margin(im,:),'r*--');
 title(['P_e(\tau).' sprintf('m=%d n=%d alpha=%d rhoTotdB=%d',mm(im),nn(im),alpha,rho_tot_dB)]);
 legend('Sim','Theory');
 
