@@ -21,7 +21,7 @@ for tau = -m+1:-1
     s2_m_atau = s(end-m+atau+1:end);
     mu = norms2 - real(s1_m_atau'*s2_m_atau);
     sigma2 = mu + norm(s1_atau)^2 * rho/2;
-    perrp(tau) = normcdf(0,mu,sqrt(sigma2));
+    perrp(N+tau) = normcdf(0,mu,sqrt(sigma2));
 end
 
 perrp(m:end-m+1) = normcdf(0, norms2, norms * sqrt(1+rho/2));
