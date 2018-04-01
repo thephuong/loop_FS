@@ -18,6 +18,7 @@ CONST_ML_RULE=1;
 CONST_COR_RULE=2;
 CONST_dataType_UNISPHERE=1;
 CONST_dataType_GAUSSIAN=2;
+dataTypeName = {'UniSphere','Normal'};
 
 NTEST = 1e5;
 mm = 3:2:28;%3:2:32;%floor(N/2);
@@ -43,10 +44,11 @@ perr = zeros(lenmm,1);         %sync error, optimum rule, sim
 perrcorr = zeros(lenmm,1);     %sync error, corr rule, sim
 
 perr_margin_ML = zeros(lenmm,N-1);   %Pe at tau, sim, ML
-perr_margin = zeros(lenmm,N-1);      %Pe at tau, sim, corr rule
+perr_margin_cor = zeros(lenmm,N-1);      %Pe at tau, sim, corr rule
 
-perra = zeros(lenmm,1);        %Pe,union, theory
-perr_a_margin = zeros(lenmm,N-1);%Pe at tau, theory
+perr_a_cor = zeros(lenmm,1);            %Pe,union, theory, corr rule
+perr_a_ML = zeros(lenmm,1);             %Pe,union, theory, ML rule
+perr_a_margin_cor = zeros(lenmm,N-1);%Pe at tau, theory
 perr_a_margin_ML = zeros(lenmm,N-1);%Pe at tau, theory, ML
 
 parfor im = 1:lenmm
@@ -69,19 +71,21 @@ parfor im = 1:lenmm
 %         perrmargin_ML(im,:) = perr_uni_margin_ML_cpx(m,n,ss{im},rhoD_tab(im),NTEST);
 %         perrmargin(im,:) = perr_uni_margin_corr_cpx(m,n,ss{im},rhoD_tab(im),NTEST);
         perr_margin_ML(im,:) = perr_uni_margin_cpx_bloc(m,n,ss{im},rhoD_tab(im),CONST_ML_RULE,DATA_TYPE, SIMUPARAMS);
-        perr_margin(im,:) = perr_uni_margin_cpx_bloc(m,n,ss{im},rhoD_tab(im),CONST_COR_RULE,DATA_TYPE, SIMUPARAMS);
+        perr_margin_cor(im,:) = perr_uni_margin_cpx_bloc(m,n,ss{im},rhoD_tab(im),CONST_COR_RULE,DATA_TYPE, SIMUPARAMS);
     end
 
     %theoretical Pe(tau)
     if (IS_PREDICT_ONLY >= 1)
         if (DATA_TYPE == CONST_dataType_UNISPHERE)
-            perr_a_margin(im,:) = fpredict_perr_uni_margin_corr_cpx(ss{im},m,n,rhoD_tab(im));
-            perra(im) = sum(perr_a_margin(im,:),2);
+            perr_a_margin_cor(im,:) = fpredict_perr_uni_margin_corr_cpx(ss{im},m,n,rhoD_tab(im));
+            perr_a_cor(im) = sum(perr_a_margin_cor(im,:),2);
             perr_a_margin_ML(im,:) = fpredict_perr_uni_margin_ML_cpx(ss{im},m,n,rhoD_tab(im));
+            perr_a_ML(im) = sum(perr_a_margin_ML(im,:),2);
         else
-            perr_a_margin(im,:) = fpredict_perr_Normal_margin_corr_cpx(ss{im},m,n,rhoD_tab(im));
-            perra(im) = sum(perr_a_margin(im,:),2);
+            perr_a_margin_cor(im,:) = fpredict_perr_Normal_margin_corr_cpx(ss{im},m,n,rhoD_tab(im));
+            perr_a_cor(im) = sum(perr_a_margin_cor(im,:),2);
             perr_a_margin_ML(im,:) = fpredict_perr_Normal_margin_ML_cpx(ss{im},m,n,rhoD_tab(im));
+            perr_a_ML(im) = sum(perr_a_margin_ML(im,:),2);
         end
     end
 
@@ -103,8 +107,8 @@ ed = epsilon_D_cpx(nbits,nn,rhoD_tab);
 
 %% Visualize
 Rc = max(0,R);
-perrac = min(1,perra);
-perraMLc = min(1,sum(perr_a_margin_ML,2));
+perrac = min(1,perr_a_cor);
+perraMLc = min(1,perr_a_ML);
 debit = (1-perr(:)) .* Rc .* nn(:);
 debitcorr = (1-perrcorr(:)) .* Rc .* nnt;
 debita = (1-perrac(:)) .* Rc .* nnt;
@@ -116,10 +120,10 @@ figure;
 semilogy(mm,perr,'b-');%,'LineWidth',LWIDTH);
 hold on; grid on;
 semilogy(mm,sum(perr_margin_ML,2),'ro');%,'LineWidth',LWIDTH,'MarkerSize',MKERSIZE_BIG);
-semilogy(mm,sum(perr_a_margin_ML,2),'m*');%,'LineWidth',LWIDTH_BOLD,'MarkerSize',MKERSIZE);
+semilogy(mm,perr_a_ML,'m*');%,'LineWidth',LWIDTH_BOLD,'MarkerSize',MKERSIZE);
 semilogy(mm,perrcorr,'b--','LineWidth', LWIDTH);
-semilogy(mm,sum(perr_margin,2),'rs');%,'LineWidth',LWIDTH,'MarkerSize',MKERSIZE_BIG);
-semilogy(mm,perra,'m+');%,'LineWidth',LWIDTH_BOLD,'MarkerSize',MKERSIZE);
+semilogy(mm,sum(perr_margin_cor,2),'rs');%,'LineWidth',LWIDTH,'MarkerSize',MKERSIZE_BIG);
+semilogy(mm,perr_a_cor,'m+');%,'LineWidth',LWIDTH_BOLD,'MarkerSize',MKERSIZE);
 legend('Pe ML rule','Pe,union ML (sim)','Pe,union ML (predicted)',...
     'Pe cor rule','Pe,union cor (sim)','Pe,union cor (predicted)');
 title(sprintf('N=%d alpha=%d rhoTot=%ddB,s %s,D uni',N,alpha,rho_tot_dB,sname{stype}));
@@ -136,28 +140,45 @@ title(sprintf('N=%d alpha=%d rhoTot=%ddB,s %s,D uni',N,alpha,rho_tot_dB,sname{st
 figure
 semilogy(mm,1-(1-perr).*(1-ed));
 hold on; grid on;
-semilogy(mm,1-(1-min(sum(perr_a_margin_ML,2),1)).*(1-ed),'m*');
+semilogy(mm,1-(1-min(perr_a_ML,1)).*(1-ed),'m*');
 semilogy(mm,1-(1-perrcorr).*(1-ed),'b--');
-semilogy(mm,1-(1-min(sum(perr_a_margin,2),1)).*(1-ed),'m+');
+semilogy(mm,1-(1-min(perr_a_cor,1)).*(1-ed),'m+');
 legend('P_f ML','predicted P_f ML','P_f corr','predicted P_f corr');
 
+%Corr rule
 figure; im=3;
-semilogy(perr_margin(im,:),'bo-');
+semilogy(perr_margin_cor(im,:),'bo-');
 hold on; grid on;
-semilogy(perr_a_margin(im,:),'r*--');
-title(['P_e(\tau).' sprintf('m=%d n=%d alpha=%d rhoTotdB=%d',mm(im),nn(im),alpha,rho_tot_dB)]);
+semilogy(perr_a_margin_cor(im,:),'r*--');
+title(['Corr rule. P_e(\tau).' sprintf('m=%d n=%d alpha=%d rhoTotdB=%d',mm(im),nn(im),alpha,rho_tot_dB)]);
+legend('Sim','Theory');
+%Corr rule
+figure; im=10;
+semilogy(perr_margin_cor(im,:),'bo-');
+hold on; grid on;
+semilogy(perr_a_margin_cor(im,:),'r*--');
+title(['Corr rule. P_e(\tau).' sprintf('m=%d n=%d alpha=%d rhoTotdB=%d',mm(im),nn(im),alpha,rho_tot_dB)]);
 legend('Sim','Theory');
 
-figure; im=10;
-semilogy(perr_margin(im,:),'bo-');
+%ML rule
+figure; im=3;
+semilogy(perr_margin_ML(im,:),'bo-');
 hold on; grid on;
-semilogy(perr_a_margin(im,:),'r*--');
-title(['P_e(\tau).' sprintf('m=%d n=%d alpha=%d rhoTotdB=%d',mm(im),nn(im),alpha,rho_tot_dB)]);
+semilogy(perr_a_margin_ML(im,:),'r*--');
+title(['ML rule. P_e(\tau).' sprintf('m=%d n=%d alpha=%d rhoTotdB=%d',mm(im),nn(im),alpha,rho_tot_dB)]);
+legend('Sim','Theory');
+%ML rule
+figure; im=10;
+semilogy(perr_margin_ML(im,:),'bo-');
+hold on; grid on;
+semilogy(perr_a_margin_ML(im,:),'r*--');
+title(['ML rule. P_e(\tau).' sprintf('m=%d n=%d alpha=%d rhoTotdB=%d',mm(im),nn(im),alpha,rho_tot_dB)]);
 legend('Sim','Theory');
 
 %% Save
 if (IS_PREDICT_ONLY >= 3)
     dtt = datestr(datetime);
     dtt(dtt==':')='-';
-    save(sprintf('tpn_N%d_rho_tot%ddB_alphaPower%d_1e%d_%s.mat',N,rho_tot_dB,alpha,-log10(epsilon),dtt));
+    save(sprintf('tpn_data_%s_N%d_rho_tot%ddB_alphaPower%d_1e%d_%s.mat',dataTypeName{DATA_TYPE}, ...
+        N,rho_tot_dB,alpha,-log10(epsilon),dtt));
 end
