@@ -13,9 +13,6 @@ stype = 2; %1 uni, 2 ZC, 3 bin
 sname = {'uni','ZC','bin'};
 % descrip = 'N=102 rho=0db real simu of perr sync, s uni with 3db boost, corr rule. perr margin. epsilon=1e-3';
 
-CONST_ML_RULE=1;
-CONST_COR_RULE=2;
-
 NTEST = 1e5;
 mm = 3:2:28;%3:2:32;%floor(N/2);
 nn = N - mm;
