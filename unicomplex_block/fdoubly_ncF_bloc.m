@@ -1,5 +1,5 @@
-function pp = fdoubly_ncF_bloc(m1,lambda1,m2,lambda2,z0)
-    NTEST = 1e5;
+function pp = fdoubly_ncF_bloc(m1,lambda1,m2,lambda2,z0, NTEST)
+    if nargin < 6; NTEST = 1e5; end
 	ntest_perbloc=1e3;
 	nbloc = ceil(NTEST/ntest_perbloc);
 	nn = 0;
