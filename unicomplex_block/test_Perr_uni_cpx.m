@@ -1,5 +1,6 @@
 clear all
 addpath(genpath('../unitfuncs/'));
+
 nopt = 90;mopt = 12;
 N = nopt+mopt;
 rho_tot_dB = -1;
@@ -13,16 +14,20 @@ stype = 2; %1 uni, 2 ZC, 3 bin
 sname = {'uni','ZC','bin'};
 % descrip = 'N=102 rho=0db real simu of perr sync, s uni with 3db boost, corr rule. perr margin. epsilon=1e-3';
 
+CONST_ML_RULE=1;
+CONST_COR_RULE=2;
+CONST_dataType_UNISPHERE=1;
+CONST_dataType_GAUSSIAN=2;
+
 NTEST = 1e5;
 mm = 3:2:28;%3:2:32;%floor(N/2);
 nn = N - mm;
 lenmm = length(mm);
-
-CONST_ML_RULE=1;
-CONST_COR_RULE=2;
+DATA_TYPE=CONST_dataType_UNISPHERE;
 
 SIMUPARAMS = struct('NTEST',NTEST, ...
     'CONST_ML_RULE',CONST_ML_RULE,'CONST_COR_RULE',CONST_COR_RULE, ...
+    'CONST_dataType_UNISPHERE',CONST_dataType_UNISPHERE,'CONST_dataType_GAUSSIAN',CONST_dataType_GAUSSIAN, ...
     'min_NERR', 200);
 
 if (stype == 2)
@@ -55,8 +60,8 @@ parfor im = 1:lenmm
 %         perr(im) = perr_uni_cpx(m,n,ss{im},rhoD_tab(im), 1, NTEST);
 %         perrcorr(im) = perr_uni_cpx(m,n,ss{im},rhoD_tab(im), 2, NTEST);
 %     %     perr_MLtest(im) = perr_uni_cpx(m,n,ss{im},rhoD_tab(im), 3, NTEST);
-        perr(im) = perr_uni_cpx_bloc(m,n,ss{im},rhoD_tab(im),CONST_ML_RULE, SIMUPARAMS);
-        perrcorr(im) = perr_uni_cpx_bloc(m,n,ss{im},rhoD_tab(im),CONST_COR_RULE, SIMUPARAMS);
+        perr(im) = perr_uni_cpx_bloc(m,n,ss{im},rhoD_tab(im),CONST_ML_RULE,DATA_TYPE, SIMUPARAMS);
+        perrcorr(im) = perr_uni_cpx_bloc(m,n,ss{im},rhoD_tab(im),CONST_COR_RULE,DATA_TYPE, SIMUPARAMS);
     end
     
     %real Pe(tau)

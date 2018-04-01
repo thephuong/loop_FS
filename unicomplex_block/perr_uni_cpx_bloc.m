@@ -1,4 +1,4 @@
-function perr = perr_uni_cpx_bloc(m,n,s,rho,rule,SIMUPARAMS)
+function perr = perr_uni_cpx_bloc(m,n,s,rho,rule,dataType,SIMUPARAMS)
 
 % if nargin < 6; NTEST = 1e6; end
 % if nargin < 5; rule = 2; NTEST = 1e6; end
@@ -8,13 +8,29 @@ min_NERR = SIMUPARAMS.min_NERR;
 N = m+n;
 r = sqrt(n*rho);
 
-switch (rule)
-    case SIMUPARAMS.CONST_ML_RULE
-        fmetric = @(y,tau,m,n,rho,s) fmetric_uni_cpx_bloc(circshift(y,-tau),m,n,rho,s);
-    case SIMUPARAMS.CONST_COR_RULE
-        fmetric = @(y,tau,m,n,rho,s) fmetric_cor_cpx_bloc(circshift(y,-tau),m,s);
+switch (dataType)
+    case SIMUPARAMS.CONST_dataType_UNISPHERE
+        fGenData = @(n,r,ntest_perbloc) fGenUniVec_cpx_bloc(n,r,ntest_perbloc,-1);
+        switch (rule)
+            case SIMUPARAMS.CONST_ML_RULE
+                fmetric = @(y,tau,m,n,rho,s) fmetric_uni_cpx_bloc(circshift(y,-tau),m,n,rho,s);
+            case SIMUPARAMS.CONST_COR_RULE
+                fmetric = @(y,tau,m,n,rho,s) fmetric_cor_cpx_bloc(circshift(y,-tau),m,s);
+            otherwise
+                error('Rule(%d) not supported.',rule);
+        end
+    case SIMUPARAMS.CONST_dataType_GAUSSIAN
+        fGenData = @(n,r,ntest_perbloc) r/sqrt(2*n)*(randn(n,ntest_perbloc) + 1i*randn(n,ntest_perbloc));
+        switch (rule)
+            case SIMUPARAMS.CONST_ML_RULE
+                fmetric = @(y,tau,m,n,rho,s) fmetric_Normal_cpx_bloc(circshift(y,-tau),m,rho,s);
+            case SIMUPARAMS.CONST_COR_RULE
+                fmetric = @(y,tau,m,n,rho,s) fmetric_cor_cpx_bloc(circshift(y,-tau),m,s);
+            otherwise
+                error('Rule(%d) not supported.',rule);
+        end
     otherwise
-        error('Rule(%d) not supported.',rule);
+        error('dataType(%d) not supported.',dataType);
 end
 
 ntest_perbloc = 1000;
@@ -22,7 +38,7 @@ nbloc = ceil(NTEST/ntest_perbloc);
 sbloc = repmat(s,1,ntest_perbloc);
 nerr = 0;
 for ibloc = 1:nbloc
-    y = [sbloc; fGenUniVec_cpx_bloc(n,r,ntest_perbloc,-1)] + ...
+    y = [sbloc; fGenData(n,r,ntest_perbloc)] + ...
         1/sqrt(2)*(randn(N,ntest_perbloc)+1i*randn(N,ntest_perbloc));
     metric0_bloc = repmat(fmetric(y,0,m,n,rho,s),N-1,1);
     metrictau_bloc = zeros(N-1,ntest_perbloc);
