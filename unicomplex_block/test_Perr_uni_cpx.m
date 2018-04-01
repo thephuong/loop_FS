@@ -21,6 +21,13 @@ mm = 3:2:28;%3:2:32;%floor(N/2);
 nn = N - mm;
 lenmm = length(mm);
 
+CONST_ML_RULE=1;
+CONST_COR_RULE=2;
+
+SIMUPARAMS = struct('NTEST',NTEST, ...
+    'CONST_ML_RULE',CONST_ML_RULE,'CONST_COR_RULE',CONST_COR_RULE, ...
+    'min_NERR', 200);
+
 if (stype == 2)
     pm = find(mod(mm,2)==1);
     mm = mm(pm);
@@ -52,8 +59,8 @@ parfor im = 1:lenmm
 %         perr(im) = perr_uni_cpx(m,n,ss{im},rhoD_tab(im), 1, NTEST);
 %         perrcorr(im) = perr_uni_cpx(m,n,ss{im},rhoD_tab(im), 2, NTEST);
 %     %     perr_MLtest(im) = perr_uni_cpx(m,n,ss{im},rhoD_tab(im), 3, NTEST);
-        perr(im) = perr_uni_cpx_bloc(m,n,ss{im},rhoD_tab(im),CONST_ML_RULE, NTEST);
-        perrcorr(im) = perr_uni_cpx_bloc(m,n,ss{im},rhoD_tab(im),CONST_COR_RULE, NTEST);
+        perr(im) = perr_uni_cpx_bloc(m,n,ss{im},rhoD_tab(im),CONST_ML_RULE, SIMUPARAMS);
+        perrcorr(im) = perr_uni_cpx_bloc(m,n,ss{im},rhoD_tab(im),CONST_COR_RULE, SIMUPARAMS);
     end
     
     %real Pe(tau)
