@@ -2,7 +2,7 @@ addpath(genpath('../unitfuncs/'));
 
 nopt = 90;mopt = 12;
 N = nopt+mopt;
-rho_tot_dB = -1;
+rho_tot_dB = 0;
 IS_PREDICT_ONLY = 2;
 % rhodB = 0;%0; %3; %rho_d
 % alpha = 1; %2; %1;
@@ -19,8 +19,8 @@ CONST_dataType_UNISPHERE=1;
 CONST_dataType_GAUSSIAN=2;
 dataTypeName = {'UniSphere','Normal'};
 
-NTEST = 1e5;
-mm = 3:2:28;%3:2:32;%floor(N/2);
+NTEST = 5e6;
+mm = 3:2:26;%3:2:32;%floor(N/2);
 nn = N - mm;
 lenmm = length(mm);
 DATA_TYPE=CONST_dataType_GAUSSIAN;
@@ -54,7 +54,7 @@ perr_a_margin_ML = zeros(lenmm,N-1);%Pe at tau, theory, ML
 parfor im = 1:lenmm
 	m = mm(im);
 	n = nn(im);
-    fprintf('m=%d\n',m);
+%     fprintf('m=%d\n',m);
     [ss{im},rhoD_tab(im)] = fGenSyncWord(m,n,rho_tot,alpha,stype);
     
     %real frame sync (FS) error
