@@ -20,7 +20,7 @@ CONST_dataType_UNISPHERE=1;
 CONST_dataType_GAUSSIAN=2;
 dataTypeName = {'UniSphere','Normal'};
 
-NTEST = 1e5;
+NTEST = 1e6;
 mm = 3:2:26;%3:2:32;%floor(N/2);
 nn = N - mm;
 lenmm = length(mm);
@@ -118,6 +118,14 @@ debitcorr = (1-perrcorr(:)) .* Rc .* nnt;
 debita = (1-perrac(:)) .* Rc .* nnt;
 debita_ML = (1-perraMLc(:)) .* Rc .* nnt;
 
+% %backcompatible
+% perr_margin_ML = perrmargin_ML;
+% perr_margin_cor = perrmargin;
+% perr_a_cor = perra;
+% perr_a_ML = sum(perramargin_ML,2);
+% perr_a_margin_cor = perramargin;
+% perr_a_margin_ML = perramargin_ML;
+
 MKERSIZE = 5; MKERSIZE_BIG = 5;
 LWIDTH = 1; LWIDTH_BOLD = 1;
 figure;
@@ -192,7 +200,7 @@ if (im <= lenmm)
 end
 
 %% Save
-if (IS_PREDICT_ONLY >= 3)
+if (IS_PREDICT_ONLY >= 2)
     dtt = datestr(datetime);
     dtt(dtt==':')='-';
     save(sprintf('tpn_data_%s_N%d_rho_tot%ddB_alphaPower%d_1e%d_%s.mat',dataTypeName{DATA_TYPE}, ...
