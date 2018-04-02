@@ -1,6 +1,6 @@
 function func_test_Perr_Normal_Uni_cpx(DATA_TYPE,N,rho_tot_dB,alpha,mm,NTEST,...
     IS_PREDICT_ONLY,DO_VISUALIZE)
-addpath(genpath('../unitfuncs/'));
+addpath(genpath(fullfile([fileparts(pwd) '/unitfuncs'])));
 
 % nopt = 90;mopt = 12;
 % N = nopt+mopt;

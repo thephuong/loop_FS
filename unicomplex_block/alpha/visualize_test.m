@@ -1,5 +1,5 @@
 clear all;
-addpath(genpath('../../../unitfuncs/'));
+addpath(genpath(fullfile([fileparts(fileparts(fileparts(pwd))) '/unitfuncs'])));
 
 % % Alpha Uni
 % listfile={'tpn_ALPHA_N102_rho_tot0dB_alphaPower1.250000e-01_1e3_14-Mar-2018 01-10-50.mat',...

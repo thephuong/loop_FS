@@ -1,5 +1,5 @@
 clear all
-addpath(genpath('../unitfuncs/'));
+addpath(genpath(fullfile([fileparts(pwd) '/unitfuncs'])));
 
 nopt = 90;mopt = 12;
 N = nopt+mopt;
