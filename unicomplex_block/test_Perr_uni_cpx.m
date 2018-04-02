@@ -80,7 +80,8 @@ parfor im = 1:lenmm
         if (DATA_TYPE == CONST_dataType_UNISPHERE)
             perr_a_margin_cor(im,:) = fpredict_perr_uni_margin_corr_cpx(ss{im},m,n,rhoD_tab(im));
             perr_a_cor(im) = sum(perr_a_margin_cor(im,:),2);
-            perr_a_margin_ML(im,:) = fpredict_perr_uni_margin_ML_cpx(ss{im},m,n,rhoD_tab(im));
+%             perr_a_margin_ML(im,:) = fpredict_perr_uni_margin_ML_cpx(ss{im},m,n,rhoD_tab(im));
+            perr_a_margin_ML(im,:) = fpredict_perr_UNI_margin_ML_cpx_by_NormalApprox(ss{im},m,n,rhoD_tab(im));
             perr_a_ML(im) = sum(perr_a_margin_ML(im,:),2);
         else
             perr_a_margin_cor(im,:) = fpredict_perr_Normal_margin_corr_cpx(ss{im},m,n,rhoD_tab(im));
