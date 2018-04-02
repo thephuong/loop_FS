@@ -18,7 +18,7 @@ sigma2 = 1/2+rho*n/(2*n-3);
 parfor iy2 = 1:length(zz)
     yy = zz(iy2)/2;
     A = sqrt(n*rho/yy) - (2*n+1)/4/yy;
-    Petau_yy(iy2) = fdoubly_ncF_bloc(2*m,norms2/A^2/sigma2,2*m,2*(1-1/A)^2*norms2,0.5/sigma2);
+    Petau_yy(iy2) = fdoubly_ncF_bloc(2*m,norms2/A^2/sigma2,2*m,2*(1-1/A)^2*norms2,0.5/sigma2, 1e7);
 end
 perrp = ones(1,N-1) * sum(Petau_yy .* (pzz*dz));
 
