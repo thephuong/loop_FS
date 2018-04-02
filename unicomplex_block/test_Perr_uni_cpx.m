@@ -3,10 +3,10 @@ addpath(genpath(fullfile([fileparts(pwd) '/unitfuncs'])));
 
 nopt = 90;mopt = 12;
 N = nopt+mopt;
-rho_tot_dB = -1;
-IS_PREDICT_ONLY = 3;
+rho_tot_dB = 0;
+IS_PREDICT_ONLY = 2;
 % rhodB = 0;%0; %3; %rho_d
-alpha = 1; %2; %1;
+alpha = 2; %2; %1;
 rho_tot = 10^(rho_tot_dB/10);
 
 epsilon = 1e-3; %1e-6;
@@ -21,7 +21,7 @@ CONST_dataType_GAUSSIAN=2;
 dataTypeName = {'UniSphere','Normal'};
 
 NTEST = 1e5;
-mm = 3:2:28;%3:2:32;%floor(N/2);
+mm = 3:2:26;%3:2:32;%floor(N/2);
 nn = N - mm;
 lenmm = length(mm);
 DATA_TYPE=CONST_dataType_UNISPHERE;
@@ -130,7 +130,7 @@ semilogy(mm,sum(perr_margin_cor,2),'rs');%,'LineWidth',LWIDTH,'MarkerSize',MKERS
 semilogy(mm,perr_a_cor,'m+');%,'LineWidth',LWIDTH_BOLD,'MarkerSize',MKERSIZE);
 legend('Pe ML rule','Pe,union ML (sim)','Pe,union ML (predicted)',...
     'Pe cor rule','Pe,union cor (sim)','Pe,union cor (predicted)');
-title(sprintf('N=%d alpha=%d rhoTot=%ddB,s %s,D uni',N,alpha,rho_tot_dB,sname{stype}));
+title(sprintf('N=%d alpha=%d rhoTot=%ddB,s %s,D %s',N,alpha,rho_tot_dB,sname{stype},data_type_str));
 
 figure;
 plot(mm,debit,'b-');%,'LineWidth',LWIDTH);
@@ -139,7 +139,7 @@ plot(mm,debita_ML,'m*');%,'LineWidth',LWIDTH_BOLD,'MarkerSize',MKERSIZE);
 plot(mm,debitcorr,'b--');%,'LineWidth',LWIDTH);
 plot(mm,debita,'m+');%,'LineWidth',LWIDTH_BOLD,'MarkerSize',MKERSIZE);
 legend('Sim ML','Theory ML','Sim corr','Theory corr');
-title(sprintf('N=%d alpha=%d rhoTot=%ddB,s %s,D uni',N,alpha,rho_tot_dB,sname{stype}));
+title(sprintf('N=%d alpha=%d rhoTot=%ddB,s %s,D %s',N,alpha,rho_tot_dB,sname{stype},data_type_str));
 
 figure
 semilogy(mm,1-(1-perr).*(1-ed));
