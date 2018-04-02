@@ -23,42 +23,46 @@ listfile={'alpha_Normal/tpn_ALPHA_data_Normal_N102_rho_tot0dB_alphaPower1.250000
 'alpha_Normal/tpn_ALPHA_data_Normal_N102_rho_tot0dB_alphaPower6_1e3_02-Apr-2018 09-05-18.mat'};
 
 nfiles = length(listfile);%size(listfile,1);
-ed_mat = [];
-perra_corr_mat = [];
-perrcorr_mat = [];
+%Init
+load(listfile{1});
+ed_mat = zeros(lenmm,nfiles);
+perra_corr_mat = zeros(lenmm,nfiles);
+perrcorr_mat = zeros(lenmm,nfiles);
 nbits = 51;
-debitcorr_tab = [];
-debitcorra_tab = [];
-debit_ml_tab = [];
-debit_ml_a_tab = [];
-perr_ml_a_mat = [];
-perr_ml_mat = [];
+debitcorr_tab = zeros(lenmm,nfiles);
+debitcorra_tab = zeros(lenmm,nfiles);
+debit_ml_tab = zeros(lenmm,nfiles);
+debit_ml_a_tab = zeros(lenmm,nfiles);
+perr_ml_a_mat = zeros(lenmm,nfiles);
+perr_ml_mat = zeros(lenmm,nfiles);
 for ifile = 1:nfiles
     load(listfile{ifile});
     %back compatible
     if (~exist('perramargin_ML','var'))
-        perramargin_ML = perr_a_margin_ML;
-        perramargin = perr_a_margin_cor;
+        perr_ml_mat(:,ifile) = perr;
+        perr_ml_a_mat(:,ifile) = perr_a_ML;
+        perrcorr_mat(:,ifile) = perrcorr;
+        perra_corr_mat(:,ifile) = perr_a_cor;
+    else
+        perr_ml_mat(:,ifile) = perr;
+        perr_ml_a_mat(:,ifile) = sum(perramargin_ML,2);
+        perrcorr_mat(:,ifile) = perrcorr;
+        perra_corr_mat(:,ifile) = sum(perramargin,2);
     end
-    perr_ml_mat = [perr_ml_mat perr];
-    perr_ml_a_mat = [perr_ml_a_mat sum(perramargin_ML,2)];
     
-    perrcorr_mat=[perrcorr_mat perrcorr];
-    perra_corr_mat=[perra_corr_mat sum(perramargin,2)];
-    
-%     k = 51;
+%     k = nbits;
 %     nreal = 2*nn(:);
 %     rhot = rhoD_tab(:);
 %     C = 0.5*log2(1+rhot);
 %     V = rhot .* (2+rhot)/2 ./ (1+rhot).^2;
 %     ed = qfunc((nreal.*C + 0.5*log2(nreal) - k) ./ sqrt(nreal.*V) / log2(exp(1)));
 %     ed_mat=[ed_mat ed];
-    ed_mat = [ed_mat epsilon_D_cpx(51,nn,rhoD_tab)];
+    ed_mat(:,ifile) = epsilon_D_cpx(nbits,nn,rhoD_tab);
     
-    debit_ml_tab = [debit_ml_tab debit(:)];
-    debit_ml_a_tab = [debit_ml_a_tab debita_ML(:)];
-    debitcorr_tab = [debitcorr_tab debitcorr(:)];
-    debitcorra_tab = [debitcorra_tab debita(:)];
+    debit_ml_tab(:,ifile) = debit(:);
+    debit_ml_a_tab(:,ifile) = debita_ML(:);
+    debitcorr_tab(:,ifile) = debitcorr(:);
+    debitcorra_tab(:,ifile) = debita(:);
 end
 pea = 1-(1-min(perra_corr_mat,1)).*(1-ed_mat);
 pec = 1-(1-min(perrcorr_mat,1)).*(1-ed_mat);
@@ -104,6 +108,7 @@ semilogy(alpha_tab,pea(im,:),'r+');
 xlabel('\alpha = \rho_s/\rho');
 title('(b) Overall frame error P_f');
 
+if ~exist('data_type_str','var'); data_type_str = 'UniSphere'; end
 figure;
 semilogy(alpha_tab,pe_ml(im,:),'b-');
 hold on; grid on;
@@ -112,5 +117,5 @@ semilogy(alpha_tab,pea_ml(im,:),'r*');
 semilogy(alpha_tab,pea(im,:),'r+');
 xlabel('\alpha = \rho_s/\rho');
 ylabel('P_f');
-title('Frame error P_f');
+title(sprintf('Frame error P_f m=%d, %s data',mm(im),data_type_str));
 legend('Simulation ML rule (f_O)','Estimation ML rule (f_A)','Simulation correlation rule','Estimation correlation rule');
