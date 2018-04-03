@@ -6,6 +6,10 @@ switch (dataType)
         switch (rule)
             case SIMUPARAMS.CONST_ML_RULE
                 fmetric = @(y,tau,m,n,rho,s) fmetric_uni_cpx_bloc(circshift(y,-tau),m,n,rho,s);
+            case SIMUPARAMS.CONST_ML_RULE_NormalApprox_POWER
+                fmetric = @(y,tau,m,n,rho,s) fmetric_uni_cpx_bloc_NormalApprox_power(circshift(y,-tau),m,n,rho,s);
+            case SIMUPARAMS.CONST_ML_RULE_NormalApprox_DIST
+                fmetric = @(y,tau,m,n,rho,s) fmetric_uni_cpx_bloc_NormalApprox_dist(circshift(y,-tau),m,n,rho,s);
             case SIMUPARAMS.CONST_COR_RULE
                 fmetric = @(y,tau,m,n,rho,s) fmetric_cor_cpx_bloc(circshift(y,-tau),m,s);
             otherwise
