@@ -16,6 +16,8 @@ sname = {'uni','ZC','bin'};
 
 CONST_ML_RULE=1;
 CONST_COR_RULE=2;
+CONST_ML_RULE_NormalApprox_POWER=3;
+CONST_ML_RULE_NormalApprox_DIST=4;
 CONST_dataType_UNISPHERE=1;
 CONST_dataType_GAUSSIAN=2;
 dataTypeName = {'UniSphere','Normal'};
@@ -30,6 +32,7 @@ data_type_str = dataTypeName{DATA_TYPE};
 
 SIMUPARAMS = struct('NTEST',NTEST, 'NTEST_BIG',NTEST_BIG, ...
     'CONST_ML_RULE',CONST_ML_RULE,'CONST_COR_RULE',CONST_COR_RULE, ...
+    'CONST_ML_RULE_NormalApprox_POWER',CONST_ML_RULE_NormalApprox_POWER,'CONST_ML_RULE_NormalApprox_DIST',CONST_ML_RULE_NormalApprox_DIST, ...
     'CONST_dataType_UNISPHERE',CONST_dataType_UNISPHERE,'CONST_dataType_GAUSSIAN',CONST_dataType_GAUSSIAN, ...
     'min_NERR', 200);
 
@@ -44,6 +47,8 @@ rhoD_tab = zeros(lenmm,1);
 % perr_MLtest = zeros(length(mm),1);         %sync error, optimum rule, sim
 perr = zeros(lenmm,1);         %sync error, optimum rule, sim
 perrcorr = zeros(lenmm,1);     %sync error, corr rule, sim
+perr_NA_power = zeros(lenmm,1);     %sync error, ML rule, Normal Approx for rho, sim
+perr_NA_dist = zeros(lenmm,1);      %sync error, ML rule, D as Normal vector, sim
 
 perr_margin_ML = zeros(lenmm,N-1);   %Pe at tau, sim, ML
 perr_margin_cor = zeros(lenmm,N-1);      %Pe at tau, sim, corr rule
@@ -66,6 +71,8 @@ parfor im = 1:lenmm
 %     %     perr_MLtest(im) = perr_uni_cpx(m,n,ss{im},rhoD_tab(im), 3, NTEST);
         perr(im) = perr_uni_cpx_bloc(m,n,ss{im},rhoD_tab(im),CONST_ML_RULE,DATA_TYPE, SIMUPARAMS);
         perrcorr(im) = perr_uni_cpx_bloc(m,n,ss{im},rhoD_tab(im),CONST_COR_RULE,DATA_TYPE, SIMUPARAMS);
+        perr_NA_power(im) = perr_uni_cpx_bloc(m,n,ss{im},rhoD_tab(im),CONST_ML_RULE_NormalApprox_POWER,DATA_TYPE, SIMUPARAMS);
+        perr_NA_dist(im) = perr_uni_cpx_bloc(m,n,ss{im},rhoD_tab(im),CONST_ML_RULE_NormalApprox_DIST,DATA_TYPE, SIMUPARAMS);
     end
     
     %real Pe(tau)
@@ -94,7 +101,9 @@ parfor im = 1:lenmm
 
 	fprintf(['m=%d DONE Data=%s ..\n', ...
         'ML  %.3e %.3e %.3e\n', ...
+        'NA  %.3e %.3e\n', ...
         'cor %.3e %.3e %.3e\n'], m, data_type_str, perr(im),sum(perr_margin_ML(im,:),2),perr_a_ML(im), ...
+        perr_NA_power(im), perr_NA_dist(im), ...
         perrcorr(im),sum(perr_margin_cor(im,:),2),perr_a_cor(im));
 end
 
@@ -120,6 +129,15 @@ debitcorr = (1-perrcorr(:)) .* Rc .* nnt;
 debita = (1-perrac(:)) .* Rc .* nnt;
 debita_ML = (1-perraMLc(:)) .* Rc .* nnt;
 
+%% Save
+if (IS_PREDICT_ONLY >= 2)
+    dtt = datestr(datetime);
+    dtt(dtt==':')='-';
+    save(sprintf('tpn_data_%s_N%d_rho_tot%ddB_alphaPower%d_1e%d_%s.mat',dataTypeName{DATA_TYPE}, ...
+        N,rho_tot_dB,alpha,-log10(epsilon),dtt));
+end
+
+%% PLOT Visualization
 % %backcompatible
 % perr_margin_ML = perrmargin_ML;
 % perr_margin_cor = perrmargin;
@@ -199,12 +217,4 @@ if (im <= lenmm)
     semilogy(perr_a_margin_ML(im,:),'r*--');
     title(['ML rule. P_e(\tau).' sprintf('m=%d n=%d alpha=%d rhoTotdB=%d',mm(im),nn(im),alpha,rho_tot_dB)]);
     legend('Sim','Theory');
-end
-
-%% Save
-if (IS_PREDICT_ONLY >= 2)
-    dtt = datestr(datetime);
-    dtt(dtt==':')='-';
-    save(sprintf('tpn_data_%s_N%d_rho_tot%ddB_alphaPower%d_1e%d_%s.mat',dataTypeName{DATA_TYPE}, ...
-        N,rho_tot_dB,alpha,-log10(epsilon),dtt));
 end
