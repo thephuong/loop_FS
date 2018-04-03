@@ -8,7 +8,7 @@ r = sqrt(n*rho);
 % Select corresponding Data Generator and Decision metric
 [fmetric,fGenData] = anonymous_func_selection(rule,dataType,SIMUPARAMS);
 
-ntest_perbloc = 1000;
+ntest_perbloc = min(1e4,NTEST/1e2);
 nbloc = ceil(NTEST/ntest_perbloc);
 
 sbloc = repmat(s,1,ntest_perbloc);
