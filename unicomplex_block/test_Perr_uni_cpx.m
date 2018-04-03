@@ -21,13 +21,14 @@ CONST_dataType_GAUSSIAN=2;
 dataTypeName = {'UniSphere','Normal'};
 
 NTEST = 1e6;
+NTEST_BIG = 1e7;
 mm = 3:2:26;%3:2:32;%floor(N/2);
 nn = N - mm;
 lenmm = length(mm);
 DATA_TYPE=CONST_dataType_UNISPHERE;
 data_type_str = dataTypeName{DATA_TYPE};
 
-SIMUPARAMS = struct('NTEST',NTEST, ...
+SIMUPARAMS = struct('NTEST',NTEST, 'NTEST_BIG',NTEST_BIG, ...
     'CONST_ML_RULE',CONST_ML_RULE,'CONST_COR_RULE',CONST_COR_RULE, ...
     'CONST_dataType_UNISPHERE',CONST_dataType_UNISPHERE,'CONST_dataType_GAUSSIAN',CONST_dataType_GAUSSIAN, ...
     'min_NERR', 200);

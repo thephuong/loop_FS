@@ -2,7 +2,7 @@ function perr = perr_uni_cpx_bloc(m,n,s,rho,rule,dataType,SIMUPARAMS)
 
 % if nargin < 6; NTEST = 1e6; end
 % if nargin < 5; rule = 2; NTEST = 1e6; end
-NTEST = SIMUPARAMS.NTEST;
+NTEST_BIG = SIMUPARAMS.NTEST_BIG;
 min_NERR = SIMUPARAMS.min_NERR;
 
 N = m+n;
@@ -11,8 +11,8 @@ r = sqrt(n*rho);
 % Select corresponding Data Generator and Decision metric
 [fmetric,fGenData] = anonymous_func_selection(rule,dataType,SIMUPARAMS);
 
-ntest_perbloc = min(1e4,NTEST/1e2);
-nbloc = ceil(NTEST/ntest_perbloc);
+ntest_perbloc = min(1e4,NTEST_BIG/1e2);
+nbloc = ceil(NTEST_BIG/ntest_perbloc);
 sbloc = repmat(s,1,ntest_perbloc);
 nerr = 0;
 for ibloc = 1:nbloc
@@ -34,11 +34,11 @@ perr = nerr/ibloc/ntest_perbloc;
 
 end
 
-function metric = metric_test(y,m,n,rho,s)
-ys = y(1:m);
-A = sqrt(n*rho)/norm(y) - (2*n+1)/4/norm(y)^2;
-metric = -norm(ys - s/A)^2;
-end
+% function metric = metric_test(y,m,n,rho,s)
+% ys = y(1:m);
+% A = sqrt(n*rho)/norm(y) - (2*n+1)/4/norm(y)^2;
+% metric = -norm(ys - s/A)^2;
+% end
 
 % function metric = metric_uni(y,m,n,rho,s)
 % ys = y(1:m);
