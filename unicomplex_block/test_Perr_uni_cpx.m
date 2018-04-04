@@ -5,6 +5,30 @@ nopt = 90;mopt = 12;
 N = nopt+mopt;
 rho_tot_dB = 0;
 IS_PREDICT_ONLY = 2;
+
+% if set, override IS_PREDICT_ONLY
+CONST_TEST_SELECT_Pe_MCARLO_ML = 1;
+CONST_TEST_SELECT_Pe_MCARLO_COR = 2;
+CONST_TEST_SELECT_Pe_MARGIN = 4;
+CONST_TEST_SELECT_Pe_PREDICT = 8;
+TEST_SELECTION = 15; %9
+var_Pe_MCarlo_ML = bitand(TEST_SELECTION,CONST_TEST_SELECT_Pe_MCARLO_ML) == CONST_TEST_SELECT_Pe_MCARLO_ML;
+var_Pe_MCarlo_COR = bitand(TEST_SELECTION,CONST_TEST_SELECT_Pe_MCARLO_COR) == CONST_TEST_SELECT_Pe_MCARLO_COR;
+var_Pe_MCarlo = var_Pe_MCarlo_ML || var_Pe_MCarlo_COR;
+var_Pe_MARGIN = bitand(TEST_SELECTION,CONST_TEST_SELECT_Pe_MARGIN) == CONST_TEST_SELECT_Pe_MARGIN;
+var_Pe_PREDICT = bitand(TEST_SELECTION,CONST_TEST_SELECT_Pe_PREDICT) == CONST_TEST_SELECT_Pe_PREDICT;
+var_SAVE = var_Pe_MCarlo || var_Pe_MARGIN;
+
+if (TEST_SELECTION == 0)
+    fprintf('IS_PREDICT_ONLY=%d', IS_PREDICT_ONLY);
+else
+    fprintf(['TEST_SELECTION=%d SAVE=%d\n', ...
+        'MCarlo_ML: %d MCarlo_COR: %d  MCarlo: %d\n', ...
+        'MARGIN:    %d PREDICT:    %d\n'], ...
+        TEST_SELECTION, var_SAVE, var_Pe_MCarlo_ML, var_Pe_MCarlo_COR, var_Pe_MCarlo, ...
+        var_Pe_MARGIN, var_Pe_PREDICT);
+end
+
 % rhodB = 0;%0; %3; %rho_d
 alpha = 2; %2; %1;
 rho_tot = 10^(rho_tot_dB/10);
@@ -34,7 +58,7 @@ SIMUPARAMS = struct('NTEST',NTEST, 'NTEST_BIG',NTEST_BIG, ...
     'CONST_ML_RULE',CONST_ML_RULE,'CONST_COR_RULE',CONST_COR_RULE, ...
     'CONST_ML_RULE_NormalApprox_POWER',CONST_ML_RULE_NormalApprox_POWER,'CONST_ML_RULE_NormalApprox_DIST',CONST_ML_RULE_NormalApprox_DIST, ...
     'CONST_dataType_UNISPHERE',CONST_dataType_UNISPHERE,'CONST_dataType_GAUSSIAN',CONST_dataType_GAUSSIAN, ...
-    'min_NERR', 200);
+    'min_NERR', 100);
 
 if (stype == 2)
     pm = find(mod(mm,2)==1);
@@ -65,18 +89,22 @@ parfor im = 1:lenmm
     [ss{im},rhoD_tab(im)] = fGenSyncWord(m,n,rho_tot,alpha,stype);
     
     %real frame sync (FS) error
-    if (IS_PREDICT_ONLY >= 2)
+    if ((IS_PREDICT_ONLY >= 2 && TEST_SELECTION == 0) || var_Pe_MCarlo)
 %         perr(im) = perr_uni_cpx(m,n,ss{im},rhoD_tab(im), 1, NTEST);
 %         perrcorr(im) = perr_uni_cpx(m,n,ss{im},rhoD_tab(im), 2, NTEST);
 %     %     perr_MLtest(im) = perr_uni_cpx(m,n,ss{im},rhoD_tab(im), 3, NTEST);
-        perr(im) = perr_uni_cpx_bloc(m,n,ss{im},rhoD_tab(im),CONST_ML_RULE,DATA_TYPE, SIMUPARAMS);
-        perrcorr(im) = perr_uni_cpx_bloc(m,n,ss{im},rhoD_tab(im),CONST_COR_RULE,DATA_TYPE, SIMUPARAMS);
-        perr_NA_power(im) = perr_uni_cpx_bloc(m,n,ss{im},rhoD_tab(im),CONST_ML_RULE_NormalApprox_POWER,DATA_TYPE, SIMUPARAMS);
-        perr_NA_dist(im) = perr_uni_cpx_bloc(m,n,ss{im},rhoD_tab(im),CONST_ML_RULE_NormalApprox_DIST,DATA_TYPE, SIMUPARAMS);
+        if (TEST_SELECTION == 0 || var_Pe_MCarlo_ML)
+            perr(im) = perr_uni_cpx_bloc(m,n,ss{im},rhoD_tab(im),CONST_ML_RULE,DATA_TYPE, SIMUPARAMS);
+            perr_NA_power(im) = perr_uni_cpx_bloc(m,n,ss{im},rhoD_tab(im),CONST_ML_RULE_NormalApprox_POWER,DATA_TYPE, SIMUPARAMS);
+            perr_NA_dist(im) = perr_uni_cpx_bloc(m,n,ss{im},rhoD_tab(im),CONST_ML_RULE_NormalApprox_DIST,DATA_TYPE, SIMUPARAMS);
+        end
+        if (TEST_SELECTION == 0 || var_Pe_MCarlo_COR)
+            perrcorr(im) = perr_uni_cpx_bloc(m,n,ss{im},rhoD_tab(im),CONST_COR_RULE,DATA_TYPE, SIMUPARAMS);
+        end
     end
     
     %real Pe(tau)
-    if (IS_PREDICT_ONLY >= 3)
+    if ((IS_PREDICT_ONLY >= 3 && TEST_SELECTION == 0) || var_Pe_MARGIN)
 %         perrmargin_ML(im,:) = perr_uni_margin_ML_cpx(m,n,ss{im},rhoD_tab(im),NTEST);
 %         perrmargin(im,:) = perr_uni_margin_corr_cpx(m,n,ss{im},rhoD_tab(im),NTEST);
         perr_margin_ML(im,:) = perr_uni_margin_cpx_bloc(m,n,ss{im},rhoD_tab(im),CONST_ML_RULE,DATA_TYPE, SIMUPARAMS);
@@ -84,7 +112,7 @@ parfor im = 1:lenmm
     end
 
     %theoretical Pe(tau)
-    if (IS_PREDICT_ONLY >= 1)
+    if ((IS_PREDICT_ONLY >= 1 && TEST_SELECTION == 0) || var_Pe_PREDICT)
         if (DATA_TYPE == CONST_dataType_UNISPHERE)
             perr_a_margin_cor(im,:) = fpredict_perr_uni_margin_corr_cpx(ss{im},m,n,rhoD_tab(im));
             perr_a_cor(im) = sum(perr_a_margin_cor(im,:),2);
@@ -130,7 +158,7 @@ debita = (1-perrac(:)) .* Rc .* nnt;
 debita_ML = (1-perraMLc(:)) .* Rc .* nnt;
 
 %% Save
-if (IS_PREDICT_ONLY >= 2)
+if ((IS_PREDICT_ONLY >= 2 && TEST_SELECTION == 0) || var_SAVE)
     dtt = datestr(datetime);
     dtt(dtt==':')='-';
     save(sprintf('tpn_data_%s_N%d_rho_tot%ddB_alphaPower%d_1e%d_%s.mat',dataTypeName{DATA_TYPE}, ...
